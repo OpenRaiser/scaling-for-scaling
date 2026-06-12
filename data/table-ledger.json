@@ -1,0 +1,1628 @@
+{
+  "tables": [
+    {
+      "file": "tables/tab_related_survey_theory.tex",
+      "line": 1,
+      "environment": "table*",
+      "label": "tab:related_survey_theory",
+      "caption": "Relation to optimizer surveys and unifying-theory work.",
+      "column_spec": null,
+      "header_rows": [],
+      "data_rows": [],
+      "data_rows_truncated": false,
+      "raw_rows": 0,
+      "notes": [
+        "no tabular/longtable body found"
+      ]
+    },
+    {
+      "file": "tables/tab_related_benchmarks.tex",
+      "line": 1,
+      "environment": "table*",
+      "label": "tab:related_benchmarks",
+      "caption": "Relation to large-language-model optimizer benchmarks and mechanistic empirical studies.",
+      "column_spec": null,
+      "header_rows": [],
+      "data_rows": [],
+      "data_rows_truncated": false,
+      "raw_rows": 0,
+      "notes": [
+        "no tabular/longtable body found"
+      ]
+    },
+    {
+      "file": "tables/tab_notation.tex",
+      "line": 2,
+      "environment": "table",
+      "label": "tab:notation",
+      "caption": "Mathematical notation.",
+      "column_spec": null,
+      "header_rows": [],
+      "data_rows": [],
+      "data_rows_truncated": false,
+      "raw_rows": 0,
+      "notes": [
+        "no tabular/longtable body found"
+      ]
+    },
+    {
+      "file": "tables/tab_meta_pipeline_examples.tex",
+      "line": 1,
+      "environment": "table",
+      "label": "tab:meta_pipeline_examples",
+      "caption": "Representative optimizer families viewed through the universal meta-pipeline. Active stages carry the defining mechanism; remaining stages reduce to identity maps or standard defaults.",
+      "column_spec": "\\linewidth",
+      "header_rows": [
+        [
+          "@p0.12p0.13p0.30p0.09X@ Method",
+          "Active stages",
+          "Core mechanism",
+          "Family",
+          "Pipeline constraint"
+        ]
+      ],
+      "data_rows": [
+        [
+          "AdamW",
+          "S3, S5",
+          "First/second-order moment EMAs; decoupled weight decay",
+          "T1",
+          "S2, S4 identity; S1 uniform element-wise"
+        ],
+        [
+          "Muon",
+          "S1, S2",
+          "Matrix routing; Newton--Schulz spectral orthogonalization",
+          "T2.1",
+          "S4 trivial (dimension-preserving); S3 standard momentum"
+        ],
+        [
+          "GaLore",
+          "S1--S4",
+          "Low-rank projection; subspace Adam state; inverse projection",
+          "T2.3",
+          "Dual S2/S4 via basis P_t; S5 standard"
+        ],
+        [
+          "Lion",
+          "S2, S3",
+          "Sign discretization of momentum-interpolated gradient",
+          "T3",
+          "S4 identity; no second-order state; fixed-magnitude update"
+        ],
+        [
+          "SAM",
+          "S0, S5",
+          "Perturbation-induced gradient; neighborhood-regularized write-back",
+          "T5.1",
+          "S1--S4 execute element-wise defaults"
+        ]
+      ],
+      "data_rows_truncated": false,
+      "raw_rows": 6,
+      "notes": []
+    },
+    {
+      "file": "tables/tab_effect_objectives.tex",
+      "line": 1,
+      "environment": "table*",
+      "label": "tab:effect_objectives",
+      "caption": "Dimension-B effect objectives and measurement sources.",
+      "column_spec": "\\textwidth",
+      "header_rows": [
+        [
+          "@p0.03p0.12Y p0.16p0.12Y@ ID",
+          "Name",
+          "Definition",
+          "Data source",
+          "Extra cost",
+          "Typical outputs"
+        ]
+      ],
+      "data_rows": [
+        [
+          "O1",
+          "Convergence Efficiency",
+          "Loss reduction or target-quality attainment under fixed step, token, wall-clock, or compute budget",
+          "Train/validation loss logs",
+          "None",
+          "Loss at step T; steps-to-threshold; token efficiency"
+        ],
+        [
+          "O2",
+          "Step cost",
+          "Extra optimizer computation, synchronization, or forward/backward cost relative to a baseline",
+          "Timers, profiler, analytic FLOP model",
+          "Recorded during training",
+          "Step time; optimizer FLOPs; extra backward count"
+        ],
+        [
+          "O3",
+          "Memory",
+          "Memory from optimizer states, gradient buffers, temporary factors, projection bases, and quantization buffers",
+          "Memory profiler, analytic byte model",
+          "Recorded during training",
+          "Peak memory; persistent state bytes; temporary buffer bytes"
+        ],
+        [
+          "O4",
+          "Stability",
+          "Robustness to spikes, divergence, overflow, and gradient fluctuations",
+          "Loss and gradient-norm time series",
+          "Offline post-processing",
+          "Spike frequency; gradient CV; divergence rate; completion rate"
+        ],
+        [
+          "O5",
+          "Hparam robustness",
+          "Sensitivity across learning rate, schedule, weight decay, momentum, batch size, and method-specific knobs",
+          "Multiple training runs",
+          "Search or transfer experiments",
+          "Acceptable LR interval; performance variance; tuning burden"
+        ],
+        [
+          "O6",
+          "Generalization",
+          "Quality outside the training objective, from validation to downstream, OOD, or scale-transfer evaluation",
+          "Validation, downstream, OOD, scale-transfer evaluation",
+          "Low for validation; high for full evaluation",
+          "Validation loss; train-val gap; downstream score; OOD retention"
+        ]
+      ],
+      "data_rows_truncated": false,
+      "raw_rows": 7,
+      "notes": []
+    },
+    {
+      "file": "tables/tab_taxonomy_cross_matrix.tex",
+      "line": 1,
+      "environment": "table",
+      "label": "tab:taxonomy_cross_matrix",
+      "caption": "Compact cross-matrix between method families and effect objectives. ``++'' denotes a primary target, ``+'' a common secondary target, ``0'' protocol-dependent neutrality, and ``-'' a likely cost.",
+      "column_spec": "\\linewidth",
+      "header_rows": [
+        [
+          "@>Xcccccc@ Family",
+          "O1",
+          "O2",
+          "O3",
+          "O4",
+          "O5",
+          "O6"
+        ]
+      ],
+      "data_rows": [
+        [
+          "T1 Element-wise adaptive moment and scalar control",
+          "++",
+          "0",
+          "-",
+          "+",
+          "+",
+          "0/+"
+        ],
+        [
+          "T2 Matrix-level structural methods",
+          "++",
+          "-",
+          "-/0",
+          "+",
+          "0/+",
+          "0/+"
+        ],
+        [
+          "T3 Discretized directions",
+          "+/0",
+          "+",
+          "+",
+          "+/0",
+          "0",
+          "0"
+        ],
+        [
+          "T4 State compression",
+          "0/-",
+          "0/+",
+          "++",
+          "0/-",
+          "0",
+          "0/-"
+        ],
+        [
+          "T5 Geometry regularization",
+          "+/0",
+          "-",
+          "0/-",
+          "++",
+          "+",
+          "++"
+        ]
+      ],
+      "data_rows_truncated": false,
+      "raw_rows": 6,
+      "notes": []
+    },
+    {
+      "file": "tables/tab_mechanism_informed_effect_assessment_T1.tex",
+      "line": 1,
+      "environment": "table",
+      "label": "tab:t1_effect_assessment",
+      "caption": "Mechanism-informed effect assessment for T1 subclasses. The entries are design priors for benchmark planning, not final empirical conclusions.",
+      "column_spec": null,
+      "header_rows": [],
+      "data_rows": [],
+      "data_rows_truncated": false,
+      "raw_rows": 0,
+      "notes": [
+        "no tabular/longtable body found"
+      ]
+    },
+    {
+      "file": "tables/tab_mechanism_informed_effect_assessment_T2.tex",
+      "line": 1,
+      "environment": "table*",
+      "label": "tab:t2_effect_assessment",
+      "caption": "Mechanism-informed effect assessment for T2 subclasses. The entries are design priors for benchmark planning, not empirical conclusions.",
+      "column_spec": null,
+      "header_rows": [],
+      "data_rows": [],
+      "data_rows_truncated": false,
+      "raw_rows": 0,
+      "notes": [
+        "no tabular/longtable body found"
+      ]
+    },
+    {
+      "file": "tables/tab_mechanism_informed_effect_assessment_T3.tex",
+      "line": 1,
+      "environment": "table",
+      "label": "tab:t3_effect_assessment",
+      "caption": "Mechanism-informed effect assessment for T3 methods. The entries are design priors for benchmark planning, not empirical conclusions.",
+      "column_spec": "\\linewidth",
+      "header_rows": [
+        [
+          "@p0.17Y p0.19Y@ Group",
+          "Primary target",
+          "Likely cost or failure mode",
+          "Benchmark focus"
+        ]
+      ],
+      "data_rows": [
+        [
+          "SignSGD / Signum",
+          "O2 communication or update simplicity; O4 robustness to magnitude outliers",
+          "Loss of magnitude information; sensitivity to sign noise and bias",
+          "Compare pure sign, momentum sign, and SGD/AdamW under matched noise, batch size, and distributed settings"
+        ],
+        [
+          "Lion",
+          "O3 lower optimizer state and O2 cheap updates; possible O1/O4 gains under tuned schedules",
+          "Fixed-magnitude steps make LR, weight decay, and warmup protocol-sensitive",
+          "Sweep LR, weight decay, schedule, batch size, and model scale against strong AdamW baselines"
+        ],
+        [
+          "RLion / FOCUS / Ano",
+          "O4 stability or noisy-landscape robustness around sign directions",
+          "Extra knobs or partial loss of the clean sign geometry; limited LLM evidence",
+          "Report source domains, tune extra parameters, and separate smoothing, attraction, and magnitude-channel effects"
+        ]
+      ],
+      "data_rows_truncated": false,
+      "raw_rows": 4,
+      "notes": []
+    },
+    {
+      "file": "tables/tab_mechanism_informed_effect_assessment_T4.tex",
+      "line": 1,
+      "environment": "table*",
+      "label": "tab:t4_effect_assessment",
+      "caption": "Mechanism-informed effect assessment for T4 subclasses. The entries are design priors for benchmark planning, not empirical conclusions.",
+      "column_spec": "\\textwidth",
+      "header_rows": [
+        [
+          "@p0.19Y p0.23Y@ Subclass",
+          "Primary target",
+          "Likely cost or failure mode",
+          "Benchmark focus"
+        ]
+      ],
+      "data_rows": [
+        [
+          "T4.1 Row-column factorization",
+          "O3 memory reduction for matrix second-moment state",
+          "Approximation error when row/column marginals miss coordinate variation; possible O4 instability",
+          "Compare AdamW, AdaFactor, and CAME under matched clipping, scale correction, sequence length, and memory budget"
+        ],
+        [
+          "T4.2 Low-bit state quantization",
+          "O3 state memory and sometimes O2 bandwidth/cache efficiency",
+          "Quantization noise, block-size sensitivity, dequantization overhead, precision-sensitive embeddings",
+          "Report state precision, block size, rounding rule, embedding handling, step time, and convergence at matched memory"
+        ],
+        [
+          "T4.3 Block/layer state sharing",
+          "O3 reduction by lowering the number of adaptive statistics; possible communication savings",
+          "Bad grouping can underfit heterogeneous curvature; coarse sharing can hurt O1/O4",
+          "Sweep grouping granularity, attention-head/block/layer partitions, model scale, and robustness to LR/WD tuning"
+        ],
+        [
+          "T4.4 Fused backprop-update",
+          "O3 peak memory by reducing gradient lifetime and persistent states",
+          "Incompatibility with global-gradient operations and some T2/T5 wrappers; possible convergence gap without adaptivity",
+          "Measure peak memory, gradient-buffer lifetime, clipping behavior, compatibility with sharding/checkpointing, and fine-tuning quality"
+        ]
+      ],
+      "data_rows_truncated": false,
+      "raw_rows": 5,
+      "notes": []
+    },
+    {
+      "file": "tables/tab_mechanism_informed_effect_assessment_T5.tex",
+      "line": 1,
+      "environment": "table*",
+      "label": "tab:t5_effect_assessment",
+      "caption": "Mechanism-informed effect assessment for T5 subclasses. The entries are design priors for benchmark planning, not empirical conclusions.",
+      "column_spec": "\\textwidth",
+      "header_rows": [
+        [
+          "@p0.20Y p0.23Y@ Subclass",
+          "Primary target",
+          "Likely cost or failure mode",
+          "Benchmark focus"
+        ]
+      ],
+      "data_rows": [
+        [
+          "T5.1 Adversarial perturbation (SAM family)",
+          "O6 generalization and O4 flatness/stability through perturbed-gradient training",
+          "Extra forward-backward pass, perturbation-radius sensitivity, possible wall-clock loss despite token gains",
+          "Report matched-token and matched-compute curves, perturbation radius, perturbation frequency, base optimizer, batch size, and downstream evaluation"
+        ],
+        [
+          "T5.2 Diagonal Hessian estimation",
+          "O1 convergence and O4 stability through explicit diagonal curvature and trust-region clipping",
+          "HVP or proxy-estimation overhead, clipping-parameter sensitivity, noisy or stale curvature estimates",
+          "Specify Hessian-estimation cadence, HVP batch, Sophia-H vs. Sophia-G choice, clipping rule, and mixed-precision behavior"
+        ],
+        [
+          "T5.3 Post-update filtering and selective updates",
+          "O4 stability, O5 tuning width, and sometimes O1 by suppressing harmful coordinates or spikes",
+          "Filtering can remove useful descent components; masks and norm controls may introduce extra hyperparameters",
+          "Compare the same base optimizer with and without the filter; log kept-coordinate ratio, spike frequency, gradient/update alignment, and LR/WD robustness"
+        ],
+        [
+          "T5.4 Layer-wise trust-region scaling",
+          "O4 stability and O5 robustness under large batch or heterogeneous layer scales",
+          "Trust-ratio instability for small norms; sensitivity to excluded parameter groups and weight-decay ordering",
+          "Report layerwise norm distributions, excluded tensors, trust-ratio clipping, global clipping order, batch size, and large-batch scaling behavior"
+        ]
+      ],
+      "data_rows_truncated": false,
+      "raw_rows": 5,
+      "notes": []
+    },
+    {
+      "file": "tables/tab_opt_coverage.tex",
+      "line": 1,
+      "environment": "table*",
+      "label": "tab:opt_coverage",
+      "caption": "Taxonomy and four-axis coverage of the 24 benchmarked optimizers. For each optimizer we list its subclass, its four-axis coordinates (Axes I--IV of Section [ref]), and the meta-pipeline stage(s) with a non-identity operation. Axis III is shown through its two equivalent readings, the LMO constraint geometry and the preconditioner, which are two faces of the same direction operator _t. State estimation (Axis II) absorbs momentum, the second-moment / Hessian proxy H_t, variance reduction (FO/VR/STORM), and any state compression, while the update domain (Axis I) records the space in which the update lives. ``full'' denotes the original coordinate space.",
+      "column_spec": "ll|ccccc|c",
+      "header_rows": [
+        [
+          "Optimizer",
+          "Sub.",
+          "Four-axis coordinates(Axis III: LMO\\,\\,Precond.)",
+          "",
+          "",
+          "",
+          "",
+          "2*Pipeline"
+        ],
+        [
+          "stage"
+        ],
+        [
+          "(lr)3-7",
+          "",
+          "I"
+        ],
+        [
+          "Domain X_t & II"
+        ],
+        [
+          "State est. & III"
+        ],
+        [
+          "LMO reading & III"
+        ],
+        [
+          "Precond.\\ reading & IV"
+        ],
+        [
+          "Finalize &"
+        ]
+      ],
+      "data_rows": [
+        [
+          "T1: Element-wise Adaptive Moment Estimation",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "basebg AdamW",
+          "T1.1",
+          "full",
+          "m_t,v_t",
+          "adapt.\\ _ box",
+          "diag(v_t),\\,12",
+          "LR\\,+\\,dec.\\ WD",
+          "S3/S5"
+        ],
+        [
+          "RAdam",
+          "T1.1",
+          "full",
+          "m_t,v_t rect.",
+          "adapt.\\ _ box",
+          "diag(v_t),\\,12",
+          "rect.\\ warmup\\,+\\,WD",
+          "S3/S5"
+        ],
+        [
+          "NAdam",
+          "T1.1",
+          "full",
+          "Nesterov m_t,v_t",
+          "adapt.\\ _ box",
+          "diag(v_t),\\,12",
+          "lookahead\\,+\\,WD",
+          "S3/S5"
+        ],
+        [
+          "AdaBelief",
+          "T1.1",
+          "full",
+          "m_t, belief s_t",
+          "adapt.\\ _ box",
+          "diag(s_t),\\,12",
+          "LR\\,+\\,WD",
+          "S3/S5"
+        ],
+        [
+          "Adan",
+          "T1.1",
+          "full",
+          "m_t,v_t grad-diff (VR)",
+          "adapt.\\ _ box",
+          "diag(v_t),\\,12",
+          "LR\\,+\\,WD",
+          "S3/S5"
+        ],
+        [
+          "MARS-AdamW",
+          "T1.2",
+          "full",
+          "c_t,m_t,v_t (STORM)",
+          "adapt.\\ _ box",
+          "diag(v_t),\\,12",
+          "LR\\,+\\,dec.\\ WD",
+          "S0/S3"
+        ],
+        [
+          "Prodigy",
+          "T1.3",
+          "full",
+          "m_t,v_t,d_t",
+          "adapt.\\ _ box",
+          "diag(v_t),\\,12",
+          "auto-LR\\,+\\,WD",
+          "S3/S5"
+        ],
+        [
+          "T2: Matrix-Structured Methods",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Muon",
+          "T2.1",
+          "matrix (U,V)",
+          "M_t, H_t=M_tM_t^",
+          "spectral polar UV^",
+          "H_t,\\,12",
+          "LR\\,+\\,matrix routing",
+          "S1/S2"
+        ],
+        [
+          "RMNP",
+          "T2.1",
+          "matrix (row-wise)",
+          "M_t, H_t=diag(M_tM_t^)",
+          "row normalization",
+          "H_t,\\,12",
+          "LR\\,+\\,matrix routing",
+          "S1/S2"
+        ],
+        [
+          "Shampoo",
+          "T2.2",
+          "Kron (Q_L,Q_R)",
+          "m_t, Kron L_t,R_t",
+          "metric-ball steepest",
+          "Kron-Fisher,\\,14",
+          "LR\\,+\\,damping",
+          "S1/S2/S3/S4"
+        ],
+        [
+          "SOAP",
+          "T2.2",
+          "Kron eigen (Q_L,Q_R)",
+          "m_t,v_t, Kron",
+          "box in eigenbasis",
+          "rotated diag,\\,12",
+          "LR\\,+\\,WD",
+          "S1/S2/S3/S4"
+        ],
+        [
+          "MARS-Shampoo",
+          "T2.2",
+          "Kron (Q_L,Q_R)",
+          "c_t,m_t, Kron (STORM)",
+          "metric-ball (VR)",
+          "rotated diag,\\,12",
+          "LR\\,+\\,damping",
+          "S0/S1/S2/S3/S4"
+        ],
+        [
+          "GaLore",
+          "T2.3",
+          "subspace (Q_L,Q_R)",
+          "m_t, v_t (proj.)",
+          "projected adapt.\\ box",
+          "diag( v_t),\\,12",
+          "proj-back\\,+\\,WD",
+          "S2/S3/S4"
+        ],
+        [
+          "T3: Discretized & Quantized Directions",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Lion",
+          "T3",
+          "full",
+          "sign-mom.\\ EMAs",
+          "fixed _ box",
+          "sign self-norm (I,0)",
+          "LR\\,+\\,WD",
+          "S2/S3"
+        ],
+        [
+          "MARS-Lion",
+          "T3",
+          "full",
+          "c_t, sign-mom (STORM)",
+          "fixed _ box (VR)",
+          "sign self-norm (I,0)",
+          "LR\\,+\\,WD",
+          "S0/S2/S3"
+        ],
+        [
+          "T4: State-Compressed Optimization",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Adafactor",
+          "T4.1",
+          "full, factored",
+          "row/col 2nd-mom factors",
+          "adapt.\\ coord box",
+          "factored diag,\\,12",
+          "LR\\,+\\,factored upd.",
+          "S3"
+        ],
+        [
+          "CAME",
+          "T4.1",
+          "full, factored",
+          "factors\\,+\\,confidence",
+          "adapt.\\ coord box",
+          "factored diag\\,+\\,conf.",
+          "LR\\,+\\,conf.\\ corr.",
+          "S3"
+        ],
+        [
+          "Adam8bit",
+          "T4.2",
+          "full, INT8 state",
+          "quant.\\ m_t,v_t",
+          "adapt.\\ _ box",
+          "diag(v_t) INT8,\\,12",
+          "dequant\\,+\\,WD",
+          "S3"
+        ],
+        [
+          "Adam-mini",
+          "T4.3",
+          "block-struct.",
+          "block-shared m_t,v_t",
+          "block adapt.\\ box",
+          "block-mean diag,\\,12",
+          "LR\\,+\\,WD",
+          "S1/S3"
+        ],
+        [
+          "APOLLO",
+          "T4.3",
+          "rand-proj state",
+          "projected estimator",
+          "projected adapt.\\ box",
+          "proj.\\ diag,\\,12",
+          "proj-back\\,+\\,LR",
+          "S1/S3"
+        ],
+        [
+          "Conda",
+          "T4.3",
+          "block-struct.",
+          "block-shared m_t,v_t",
+          "block adapt.\\ box",
+          "block-mean diag,\\,12",
+          "LR\\,+\\,WD",
+          "S1/S3"
+        ],
+        [
+          "T5: Curvature-Aware & Geometry-Regularized",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Sophia",
+          "T5.2",
+          "full",
+          "m_t, Hutch.\\ HVP",
+          "clipped local geom.",
+          "Hutchinson,\\,1",
+          "LR\\,+\\,WD",
+          "S3/S5"
+        ],
+        [
+          "AdamP",
+          "T5.3",
+          "full",
+          "m_t,v_t",
+          "adapt.\\ _ box",
+          "diag(v_t),\\,12",
+          "radial proj.\\,+\\,WD",
+          "S5"
+        ],
+        [
+          "LAMB",
+          "T5.4",
+          "full",
+          "m_t,v_t",
+          "adapt.\\ _ box",
+          "diag(v_t),\\,12",
+          "trust-ratio\\,+\\,WD",
+          "S1/S5"
+        ]
+      ],
+      "data_rows_truncated": false,
+      "raw_rows": 37,
+      "notes": [
+        "contains \\multicolumn — header alignment is approximate",
+        "contains \\multirow — vertical merges are flattened"
+      ]
+    },
+    {
+      "file": "tables/tab_c4_llama3_full_screening.tex",
+      "line": 1,
+      "environment": "table*",
+      "label": "tab:c4_llama3_full_screening",
+      "caption": "Stage-1 screening on C4 (LLaMA-3, seq.\\ 256). C4 validation PPL, optimizer-state memory (Mem), and per-step runtime (T) at four scales; lower is better. Grouped by family, sorted by 1B PPL.",
+      "column_spec": "ll|ccc|ccc|ccc|ccc",
+      "header_rows": [
+        [
+          "Optimizer",
+          "Venue",
+          "60M",
+          "",
+          "",
+          "130M",
+          "",
+          "",
+          "350M",
+          "",
+          "",
+          "1B",
+          "",
+          ""
+        ],
+        [
+          "(lr)3-5(lr)6-8(lr)9-11(lr)12-14",
+          "",
+          "PPL"
+        ],
+        [
+          "& Mem"
+        ],
+        [
+          "GB & T"
+        ],
+        [
+          "ms & PPL"
+        ],
+        [
+          "& Mem"
+        ],
+        [
+          "GB & T"
+        ],
+        [
+          "ms & PPL"
+        ],
+        [
+          "& Mem"
+        ],
+        [
+          "GB & T"
+        ],
+        [
+          "ms & PPL"
+        ],
+        [
+          "& Mem"
+        ],
+        [
+          "GB & T"
+        ],
+        [
+          "ms"
+        ]
+      ],
+      "data_rows": [
+        [
+          "Element-wise Adaptive Moment Estimation",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Adan",
+          "TPAMI'23",
+          "30.25",
+          "0.433",
+          "2.32",
+          "22.84",
+          "1.000",
+          "4.72",
+          "17.29",
+          "2.742",
+          "12.06",
+          "14.35",
+          "9.977",
+          "39.67"
+        ],
+        [
+          "RAdam",
+          "ICLR'20",
+          "30.12",
+          "0.217",
+          "1.53",
+          "23.22",
+          "0.500",
+          "3.07",
+          "17.34",
+          "1.371",
+          "7.64",
+          "14.47",
+          "4.989",
+          "23.79"
+        ],
+        [
+          "basebg AdamW",
+          "ICLR'19",
+          "30.08",
+          "0.217",
+          "bestbg1.14",
+          "23.18",
+          "0.500",
+          "bestbg2.31",
+          "17.32",
+          "1.371",
+          "5.97",
+          "14.48",
+          "4.989",
+          "18.62"
+        ],
+        [
+          "NAdam",
+          "ICLR'18",
+          "33.72",
+          "0.217",
+          "3.45",
+          "24.51",
+          "0.500",
+          "4.93",
+          "17.90",
+          "1.371",
+          "9.96",
+          "14.67",
+          "4.989",
+          "20.91"
+        ],
+        [
+          "MARS-AdamW",
+          "ICML'25",
+          "30.01",
+          "0.325",
+          "7.62",
+          "22.86",
+          "0.750",
+          "11.05",
+          "16.95",
+          "2.057",
+          "22.12",
+          "14.90",
+          "7.483",
+          "34.70"
+        ],
+        [
+          "Prodigy",
+          "ICML'23",
+          "33.44",
+          "0.433",
+          "8.36",
+          "24.13",
+          "1.000",
+          "12.29",
+          "18.27",
+          "2.742",
+          "24.30",
+          "15.61",
+          "9.977",
+          "36.78"
+        ],
+        [
+          "AdaBelief",
+          "NeurIPS'20",
+          "30.08",
+          "0.433",
+          "5.76",
+          "23.45",
+          "1.000",
+          "8.55",
+          "17.61",
+          "2.742",
+          "19.10",
+          "16.79",
+          "9.977",
+          "55.48"
+        ],
+        [
+          "Matrix-Structured Methods",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "MARS-Shampoo",
+          "ICML'25",
+          "30.03",
+          "0.325",
+          "26.27",
+          "22.56",
+          "0.750",
+          "37.94",
+          "16.82",
+          "2.057",
+          "78.71",
+          "bestbg13.72",
+          "7.483",
+          "513.7"
+        ],
+        [
+          "Muon",
+          "arXiv'25",
+          "bestbg28.26",
+          "0.109",
+          "21.01",
+          "bestbg21.81",
+          "0.250",
+          "30.48",
+          "bestbg16.61",
+          "0.686",
+          "61.66",
+          "bestbg13.73",
+          "2.495",
+          "379.0"
+        ],
+        [
+          "RMNP",
+          "ICML'26",
+          "29.88",
+          "0.109",
+          "3.26",
+          "bestbg22.54",
+          "0.250",
+          "4.63",
+          "16.85",
+          "0.686",
+          "9.32",
+          "13.87",
+          "2.495",
+          "16.94"
+        ],
+        [
+          "SOAP",
+          "arXiv'24",
+          "bestbg29.47",
+          "worstbg0.731",
+          "worstbg50.58",
+          "22.67",
+          "worstbg2.214",
+          "worstbg110.4",
+          "17.14",
+          "worstbg7.465",
+          "worstbg302.5",
+          "14.04",
+          "worstbg29.299",
+          "worstbg1371.5"
+        ],
+        [
+          "GaLore",
+          "ICML'24",
+          "34.56",
+          "0.062",
+          "4.21",
+          "25.32",
+          "0.199",
+          "5.88",
+          "19.18",
+          "0.426",
+          "11.85",
+          "14.29",
+          "0.790",
+          "15.29"
+        ],
+        [
+          "Shampoo",
+          "arXiv'18",
+          "30.22",
+          "0.217",
+          "22.36",
+          "22.56",
+          "0.500",
+          "33.27",
+          "17.03",
+          "1.371",
+          "66.05",
+          "14.29",
+          "4.989",
+          "389.4"
+        ],
+        [
+          "Discretized & Quantized Directions",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "MARS-Lion",
+          "ICML'25",
+          "32.41",
+          "0.325",
+          "5.72",
+          "25.68",
+          "0.750",
+          "8.49",
+          "18.78",
+          "2.057",
+          "17.11",
+          "15.73",
+          "7.483",
+          "24.77"
+        ],
+        [
+          "Lion",
+          "arXiv'23",
+          "35.94",
+          "0.109",
+          "2.07",
+          "25.56",
+          "0.250",
+          "3.01",
+          "worstbg19.30",
+          "0.686",
+          "bestbg5.80",
+          "worstbg17.02",
+          "2.494",
+          "bestbg12.48"
+        ],
+        [
+          "State-Compressed Optimization",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "APOLLO",
+          "MLSys'25",
+          "30.86",
+          "0.062",
+          "8.62",
+          "22.74",
+          "0.149",
+          "12.65",
+          "bestbg16.43",
+          "0.426",
+          "26.21",
+          "bestbg13.53",
+          "0.790",
+          "28.65"
+        ],
+        [
+          "Conda",
+          "arXiv'25",
+          "bestbg28.65",
+          "0.245",
+          "4.88",
+          "bestbg21.91",
+          "0.595",
+          "7.11",
+          "bestbg16.45",
+          "1.703",
+          "13.90",
+          "14.25",
+          "6.317",
+          "62.33"
+        ],
+        [
+          "Adam8bit",
+          "ICLR'22",
+          "30.46",
+          "0.110",
+          "4.11",
+          "23.30",
+          "0.254",
+          "7.27",
+          "17.67",
+          "0.697",
+          "16.89",
+          "14.53",
+          "2.534",
+          "42.38"
+        ],
+        [
+          "CAME",
+          "ACL'23",
+          "31.40",
+          "0.218",
+          "14.99",
+          "23.79",
+          "0.502",
+          "21.76",
+          "17.60",
+          "1.376",
+          "44.89",
+          "14.53",
+          "4.997",
+          "87.46"
+        ],
+        [
+          "Adafactor",
+          "ICML'18",
+          "30.00",
+          "bestbg0.001",
+          "9.90",
+          "22.94",
+          "bestbg0.002",
+          "14.63",
+          "17.85",
+          "bestbg0.003",
+          "29.70",
+          "14.92",
+          "bestbg0.004",
+          "56.46"
+        ],
+        [
+          "Adam-mini",
+          "ICLR'25",
+          "30.50",
+          "0.109",
+          "5.68",
+          "23.62",
+          "0.251",
+          "8.31",
+          "18.12",
+          "0.686",
+          "16.68",
+          "15.51",
+          "2.495",
+          "20.81"
+        ],
+        [
+          "Curvature-Aware & Geometry-Regularized",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "AdamP",
+          "ICLR'21",
+          "30.21",
+          "0.217",
+          "12.82",
+          "23.07",
+          "0.500",
+          "19.13",
+          "17.39",
+          "1.371",
+          "39.98",
+          "14.57",
+          "4.989",
+          "64.69"
+        ],
+        [
+          "LAMB",
+          "ICLR'20",
+          "30.03",
+          "0.217",
+          "9.14",
+          "23.40",
+          "0.500",
+          "13.17",
+          "17.25",
+          "1.371",
+          "26.62",
+          "16.09",
+          "4.989",
+          "44.18"
+        ],
+        [
+          "Sophia",
+          "arXiv'23",
+          "worstbg36.27",
+          "0.217",
+          "3.92",
+          "worstbg25.76",
+          "0.500",
+          "5.66",
+          "18.86",
+          "1.371",
+          "11.06",
+          "16.45",
+          "4.989",
+          "20.05"
+        ]
+      ],
+      "data_rows_truncated": false,
+      "raw_rows": 43,
+      "notes": [
+        "contains \\multicolumn — header alignment is approximate",
+        "contains \\multirow — vertical merges are flattened"
+      ]
+    },
+    {
+      "file": "tables/tab_fdw_linear_attn_arch_results.tex",
+      "line": 1,
+      "environment": "table*",
+      "label": "tab:stage2_cross_arch",
+      "caption": "Stage-2 cross-architecture generalization (FineWeb-Edu, 32k). WikiText test PPL at 340M and 1B across four architectures. As absolute PPL is not comparable across architectures, the last columns give each optimizer's mean rank and range over the eight scenarios (lower is better). Per-scenario best in green; gray = AdamW.",
+      "column_spec": "l|cc|cc|cc|cc|cc",
+      "header_rows": [
+        [
+          "Optimizer",
+          "Transformer++",
+          "",
+          "Gated DeltaNet",
+          "",
+          "DeltaNet",
+          "",
+          "GLA",
+          "",
+          "2*Mean"
+        ],
+        [
+          "rank & 2*Rank"
+        ],
+        [
+          "range"
+        ],
+        [
+          "(lr)2-3(lr)4-5(lr)6-7(lr)8-9",
+          "340M",
+          "1B",
+          "340M",
+          "1B",
+          "340M",
+          "1B",
+          "340M",
+          "1B",
+          "",
+          ""
+        ]
+      ],
+      "data_rows": [
+        [
+          "T1: Element-wise Adaptive Moment",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "MARS-AdamW",
+          "24.57",
+          "18.94",
+          "24.17",
+          "20.04",
+          "26.79",
+          "20.67",
+          "28.28",
+          "21.89",
+          "3.12",
+          "[2--5]"
+        ],
+        [
+          "basebg AdamW",
+          "24.62",
+          "18.90",
+          "24.47",
+          "20.33",
+          "27.16",
+          "20.66",
+          "28.67",
+          "22.06",
+          "4.62",
+          "[2--6]"
+        ],
+        [
+          "Adan",
+          "25.55",
+          "19.41",
+          "24.78",
+          "20.55",
+          "27.28",
+          "20.88",
+          "29.00",
+          "22.51",
+          "7.12",
+          "[5--9]"
+        ],
+        [
+          "T2: Matrix-Structured Methods",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "SOAP",
+          "bestbg23.90",
+          "bestbg18.72",
+          "23.85",
+          "bestbg19.86",
+          "bestbg26.02",
+          "bestbg20.38",
+          "bestbg27.04",
+          "bestbg20.62",
+          "1.12",
+          "[1--2]"
+        ],
+        [
+          "RMNP",
+          "24.37",
+          "19.40",
+          "bestbg23.65",
+          "20.26",
+          "26.80",
+          "21.06",
+          "28.60",
+          "22.23",
+          "4.00",
+          "[1--7]"
+        ],
+        [
+          "Muon",
+          "25.05",
+          "19.86",
+          "24.34",
+          "20.32",
+          "27.18",
+          "21.18",
+          "27.47",
+          "21.54",
+          "5.25",
+          "[2--8]"
+        ],
+        [
+          "MARS-Shampoo",
+          "26.43",
+          "19.74",
+          "25.99",
+          "24.87",
+          "28.26",
+          "21.25",
+          "29.20",
+          "21.53",
+          "8.25",
+          "[2--11]"
+        ],
+        [
+          "T3: Discretized Directions",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Lion",
+          "26.02",
+          "20.26",
+          "24.76",
+          "20.38",
+          "28.20",
+          "21.44",
+          "29.47",
+          "22.40",
+          "8.25",
+          "[7--10]"
+        ],
+        [
+          "MARS-Lion",
+          "26.20",
+          "21.17",
+          "25.24",
+          "22.20",
+          "28.25",
+          "22.72",
+          "29.67",
+          "23.79",
+          "10.00",
+          "[9--11]"
+        ],
+        [
+          "T4: State-Compressed",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Conda",
+          "28.30",
+          "19.86",
+          "26.11",
+          "21.07",
+          "29.09",
+          "21.75",
+          "37.38",
+          "22.89",
+          "10.25",
+          "[9--11]"
+        ],
+        [
+          "APOLLO",
+          "34.08",
+          "25.29",
+          "30.36",
+          "29.29",
+          "34.73",
+          "25.58",
+          "37.75",
+          "27.78",
+          "12.00",
+          "[12--12]"
+        ],
+        [
+          "T5: Curvature-Aware",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "AdamP",
+          "24.68",
+          "19.04",
+          "24.32",
+          "20.29",
+          "26.77",
+          "20.68",
+          "28.66",
+          "21.86",
+          "4.00",
+          "[2--5]"
+        ]
+      ],
+      "data_rows_truncated": false,
+      "raw_rows": 21,
+      "notes": [
+        "contains \\multicolumn — header alignment is approximate",
+        "contains \\multirow — vertical merges are flattened"
+      ]
+    },
+    {
+      "file": "tables/tab_muon_cross_validation.tex",
+      "line": 1,
+      "environment": "table",
+      "label": "tab:muon_cross_validation",
+      "caption": "Cross-scale/architecture validation of Muon's gain operations. Standard Muon, symmetric two-way LR scaling, post-NS Nesterov, and their combination; lower PPL is better. Gains stack on the standard Transformer but not on Gated DeltaNet.",
+      "column_spec": "lccccc",
+      "header_rows": [
+        [
+          "Scenario",
+          "Standard"
+        ],
+        [
+          "Muon & Symmetric"
+        ],
+        [
+          "LR Scaling & Post-NS"
+        ],
+        [
+          "Nesterov & Both"
+        ],
+        [
+          "combined & Best config."
+        ]
+      ],
+      "data_rows": [
+        [
+          "Standard Transformer: gains are stackable",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "C4-LLaMA3, 350M",
+          "16.60",
+          "16.52",
+          "16.57",
+          "16.51",
+          "Both combined"
+        ],
+        [
+          "C4-LLaMA3, 1B",
+          "13.72",
+          "13.64",
+          "13.64",
+          "13.58",
+          "Both combined"
+        ],
+        [
+          "Linear attention: stacking effect disappears",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "warnbg!35 FineWeb-Edu-32k, GDN-340M",
+          "24.26",
+          "24.02",
+          "24.12",
+          "24.12",
+          "Symmetric LR Scaling"
+        ]
+      ],
+      "data_rows_truncated": false,
+      "raw_rows": 10,
+      "notes": [
+        "contains \\multicolumn — header alignment is approximate"
+      ]
+    }
+  ]
+}

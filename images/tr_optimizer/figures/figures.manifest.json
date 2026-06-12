@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "directory": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures",
+  "assets": [
+    {
+      "source": "/Volumes/T7/TR_Optimizer/figures/T1.png",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures/t1.png",
+      "kind": "raster",
+      "page": null,
+      "width": 1629,
+      "height": 543,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/figures/apollo_ablation.pdf",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures/apollo-ablation.png",
+      "kind": "raster-from-pdf",
+      "page": null,
+      "width": 1962,
+      "height": 804,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/figures/contribution.png",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures/contribution.png",
+      "kind": "raster",
+      "page": null,
+      "width": 1251,
+      "height": 643,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/figures/data_analysis.pdf",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures/data-analysis.png",
+      "kind": "raster-from-pdf",
+      "page": null,
+      "width": 2625,
+      "height": 2333,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/figures/fig_o4_heatmap.pdf",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures/fig-o4-heatmap.png",
+      "kind": "raster-from-pdf",
+      "page": null,
+      "width": 1521,
+      "height": 885,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/figures/fig_o5.pdf",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures/fig-o5.png",
+      "kind": "raster-from-pdf",
+      "page": null,
+      "width": 2328,
+      "height": 1413,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/figures/heatmap_24opt.pdf",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures/heatmap-24opt.png",
+      "kind": "raster-from-pdf",
+      "page": null,
+      "width": 1646,
+      "height": 1255,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/figures/heatmap_family.pdf",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures/heatmap-family.png",
+      "kind": "raster-from-pdf",
+      "page": null,
+      "width": 1602,
+      "height": 723,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/figures/muon_ablation_c4_350m.pdf",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures/muon-ablation-c4-350m.png",
+      "kind": "raster-from-pdf",
+      "page": null,
+      "width": 3131,
+      "height": 1592,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/figures/muon_ablation_c4_350m.png",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures/muon-ablation-c4-350m-2.png",
+      "kind": "raster",
+      "page": null,
+      "width": 1086,
+      "height": 815,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/figures/pareto_1B_advance.pdf",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures/pareto-1b-advance.png",
+      "kind": "raster-from-pdf",
+      "page": null,
+      "width": 3152,
+      "height": 1120,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/figures/pipeline.png",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures/pipeline.png",
+      "kind": "raster",
+      "page": null,
+      "width": 1254,
+      "height": 706,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/figures/rank_stability.pdf",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures/rank-stability.png",
+      "kind": "raster-from-pdf",
+      "page": null,
+      "width": 1933,
+      "height": 1416,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/figures/rank_stability_v2.pdf",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/figures/rank-stability-v2.png",
+      "kind": "raster-from-pdf",
+      "page": null,
+      "width": 1933,
+      "height": 1416,
+      "alt": "",
+      "notes": []
+    }
+  ]
+}

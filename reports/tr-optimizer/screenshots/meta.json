@@ -1,0 +1,4 @@
+{
+  "status": "skipped",
+  "reason": "no screenshot backend available (install playwright / pyppeteer / chromium); skipped."
+}

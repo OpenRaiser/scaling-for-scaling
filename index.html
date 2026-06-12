@@ -1,0 +1,2485 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scaling for Scaling: Taxonomy, Geometry, and Benchmarking of Modern Optimizers</title>
+  <meta name="description"
+    content="A taxonomy, geometric framework, and cross-domain benchmark for modern optimizers across language-model scales, architectures, memory, cost, stability, and generalization." />
+  <link rel="canonical" href="https://openraiser.github.io/scaling-for-scaling/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Scaling for Scaling: Taxonomy, Geometry, and Benchmarking of Modern Optimizers" />
+  <meta property="og:description"
+    content="A taxonomy, geometric framework, and cross-domain benchmark for modern optimizers across language-model scales, architectures, memory, cost, stability, and generalization." />
+  <meta property="og:image"
+    content="https://openraiser.github.io/scaling-for-scaling/images/tr_optimizer/logos/teaser.png" />
+  <meta property="og:url" content="https://openraiser.github.io/scaling-for-scaling/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Scaling for Scaling: Taxonomy, Geometry, and Benchmarking of Modern Optimizers" />
+  <meta name="twitter:description"
+    content="A taxonomy, geometric framework, and cross-domain benchmark for modern optimizers across language-model scales, architectures, memory, cost, stability, and generalization." />
+  <meta name="twitter:image"
+    content="https://openraiser.github.io/scaling-for-scaling/images/tr_optimizer/logos/teaser.png" />
+  <link rel="icon" type="image/png" href="images/tr_optimizer/logos/web-logo.png" />
+  <script
+    type="application/ld+json">{"@context": "https://schema.org", "@type": "ScholarlyArticle", "name": "Scaling for Scaling: Taxonomy, Geometry, and Benchmarking of Modern Optimizers", "headline": "Scaling for Scaling: Taxonomy, Geometry, and Benchmarking of Modern Optimizers", "description": "A taxonomy, geometric framework, and cross-domain benchmark for modern optimizers across language-model scales, architectures, memory, cost, stability, and generalization.", "author": [{"@type": "Person", "name": "Siyuan Li"}, {"@type": "Person", "name": "Jiabao Pan"}, {"@type": "Person", "name": "Yumou Liu"}, {"@type": "Person", "name": "Zhuoli Ouyang"}, {"@type": "Person", "name": "Xin Jin"}, {"@type": "Person", "name": "Xinglong Xu"}, {"@type": "Person", "name": "Jingxuan Wei"}, {"@type": "Person", "name": "Shengye Pang"}, {"@type": "Person", "name": "Jintao Chen"}, {"@type": "Person", "name": "Xuanhe Zhou"}, {"@type": "Person", "name": "Conghui He"}, {"@type": "Person", "name": "Cheng Tan"}], "url": "https://openraiser.github.io/scaling-for-scaling/", "image": "https://openraiser.github.io/scaling-for-scaling/images/tr_optimizer/logos/teaser.png", "keywords": ["optimizer benchmark", "large language model training", "optimizer taxonomy", "training stability", "memory efficient optimization"]}</script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f7ee;
+      --surface: #ffffff;
+      --surface-2: #e0e0c0;
+      --ink: #303030;
+      --muted: #626262;
+      --line: #d8d8c8;
+      --primary: #4060a0;
+      --primary-dark: #354f88;
+      --teal: #80a0a0;
+      --amber: #e0e0c0;
+      --red: #6060a0;
+      --blue: #6060a0;
+      --shadow: 0 18px 48px rgba(26, 45, 38, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(180deg, #fbfbf8 0%, var(--bg) 34%, #eeeece 100%);
+      color: var(--ink);
+      line-height: 1.55;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      padding: .55rem .75rem;
+      background: #000;
+      color: #fff;
+      z-index: 1000;
+    }
+
+    .skip-link:focus {
+      left: 0;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      background: rgba(247, 248, 245, .88);
+      border-bottom: 1px solid rgba(217, 227, 221, .85);
+    }
+
+    nav {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: .7rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .brand img {
+      width: 32px;
+      height: auto;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem;
+      justify-content: flex-end;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: .9rem;
+      padding: .42rem .65rem;
+      border-radius: 999px;
+    }
+
+    .nav-links a:hover {
+      background: var(--surface-2);
+      color: var(--primary-dark);
+    }
+
+    main {
+      overflow: hidden;
+    }
+
+    section {
+      padding: 4.2rem 1.25rem;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      padding-top: 2.65rem;
+      background: radial-gradient(circle at 50% 18%, rgba(224, 224, 192, .5), transparent 36%), radial-gradient(circle at 88% 10%, rgba(96, 96, 160, .12), transparent 28%);
+    }
+
+    .hero-layout {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .hero-copy {
+      max-width: 980px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .title-subline {
+      color: var(--primary);
+      font-weight: 800;
+      font-size: clamp(1.18rem, 2.2vw, 2rem);
+      line-height: 1.12;
+      margin: -.45rem 0 .85rem;
+    }
+
+    .kicker {
+      color: var(--primary);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-size: .78rem;
+    }
+
+    h1 {
+      font-size: clamp(2.4rem, 5.5vw, 5.05rem);
+      line-height: .96;
+      margin: .5rem 0 .9rem;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: clamp(1.8rem, 3vw, 3rem);
+      line-height: 1.08;
+      margin: 0 0 1rem;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      font-size: 1.12rem;
+      margin: 0 0 .5rem;
+    }
+
+    .lead {
+      font-size: 1.02rem;
+      color: var(--muted);
+      max-width: 66ch;
+      margin: .6rem auto 0;
+    }
+
+    .authors {
+      color: var(--muted);
+      font-size: .9rem;
+      margin: .85rem auto 0;
+      max-width: 980px;
+    }
+
+    .authors sup {
+      color: var(--primary);
+      font-weight: 800;
+      font-size: .68em;
+      line-height: 0;
+    }
+
+    .affiliations {
+      color: var(--muted);
+      font-size: .84rem;
+      margin: .45rem auto 0;
+      max-width: 980px;
+    }
+
+    .author-note {
+      color: var(--muted);
+      font-size: .8rem;
+      margin: .35rem auto 0;
+      max-width: 860px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .75rem;
+      margin-top: 1.1rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      min-height: 40px;
+      padding: .6rem .85rem;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      text-decoration: none;
+      background: var(--surface);
+      color: var(--ink);
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(26, 45, 38, .06);
+    }
+
+    .btn.primary {
+      background: var(--primary-dark);
+      color: #fff;
+      border-color: var(--primary-dark);
+    }
+
+    .hero-card,
+    .figure-frame,
+    .panel {
+      background: rgba(255, 255, 255, .94);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      padding: 1.5rem;
+    }
+
+    .hero-figure {
+      padding: 1.5rem;
+    }
+
+    .hero-figure img {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    figure {
+      margin: 0;
+    }
+
+    figcaption {
+      color: var(--muted);
+      font-size: .88rem;
+      margin-top: .75rem;
+    }
+
+    img.paper-figure {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 6px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: .85rem;
+      margin-top: .2rem;
+    }
+
+    .metric {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: .95rem;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 1.45rem;
+      color: var(--primary-dark);
+      line-height: 1;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: .82rem;
+      margin-top: .35rem;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 2rem;
+      align-items: end;
+      margin-bottom: 1.4rem;
+    }
+
+    .section-head p {
+      max-width: 62ch;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .band {
+      background: rgba(255, 255, 255, .45);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr);
+      gap: 1.2rem;
+      align-items: start;
+    }
+
+    .three {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: .85rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .card .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: .15rem .45rem;
+      border-radius: 999px;
+      background: #e8edf8;
+      color: var(--primary-dark);
+      font-size: .76rem;
+      font-weight: 800;
+      margin-bottom: .55rem;
+    }
+
+    .card p {
+      color: var(--muted);
+      margin: .25rem 0 0;
+      font-size: .94rem;
+    }
+
+    .framework-flow {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .stage-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: .85rem;
+    }
+
+    .stage-card,
+    .axis-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: .95rem;
+    }
+
+    .stage-card strong,
+    .axis-card strong {
+      display: block;
+      color: var(--primary);
+      font-size: .82rem;
+      margin-bottom: .35rem;
+    }
+
+    .stage-card h3,
+    .axis-card h3 {
+      font-size: 1rem;
+      line-height: 1.18;
+    }
+
+    .stage-card p,
+    .axis-card p {
+      color: var(--muted);
+      margin: .35rem 0 0;
+      font-size: .88rem;
+    }
+
+    .axis-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: .85rem;
+    }
+
+    .bridge-panel {
+      background: rgba(224, 224, 192, .24);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .bridge-panel>p {
+      color: var(--muted);
+      max-width: 78ch;
+      margin: .2rem 0 1rem;
+    }
+
+    .takeaway-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: .85rem;
+      margin: 1rem 0;
+    }
+
+    .takeaway {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .takeaway strong {
+      display: block;
+      color: var(--primary);
+      margin-bottom: .35rem;
+    }
+
+    .takeaway p {
+      color: var(--muted);
+      margin: 0;
+      font-size: .92rem;
+    }
+
+    .decision-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: .85rem;
+    }
+
+    .decision-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .decision-card strong {
+      display: block;
+      color: var(--primary);
+      font-size: .82rem;
+      margin-bottom: .4rem;
+    }
+
+    .decision-card h3 {
+      font-size: 1.05rem;
+    }
+
+    .decision-card p {
+      color: var(--muted);
+      margin: .35rem 0 0;
+      font-size: .9rem;
+    }
+
+    .decision-card.primary-pick {
+      border-color: rgba(64, 96, 160, .55);
+      box-shadow: 0 12px 32px rgba(64, 96, 160, .12);
+    }
+
+    .figure-frame {
+      padding: 1rem;
+    }
+
+    .figure-stack {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1rem;
+    }
+
+    .result-pair {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .paired-figures {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      align-items: stretch;
+    }
+
+    .paired-figures .figure-frame {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .paired-figures .figure-frame img {
+      flex: 1;
+      object-fit: contain;
+      min-height: 0;
+    }
+
+    .findings-flow {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .narrow-table-block {
+      max-width: 980px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .table-block {
+      margin-top: 1.2rem;
+      padding: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 12px 36px rgba(26, 45, 38, .05);
+    }
+
+    .framework-table-block .compact-table {
+      max-width: none;
+    }
+
+    .framework-table {
+      table-layout: fixed;
+    }
+
+    .framework-table th:nth-child(2),
+    .framework-table td:nth-child(2),
+    .framework-table th:nth-child(4),
+    .framework-table td:nth-child(4) {
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .findings-flow .table-block {
+      margin-top: 0;
+    }
+
+    .table-scaffold {
+      display: block;
+      max-width: 100%;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 100%;
+      background: #fff;
+    }
+
+    caption {
+      caption-side: top;
+      text-align: left;
+      font-weight: 800;
+      color: var(--ink);
+      padding: 0 0 .75rem;
+    }
+
+    th,
+    td {
+      border: 1px solid #d8dce8;
+      padding: .45rem .5rem;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+
+    th {
+      background: #edf0f8;
+      color: #2a3a6a;
+      font-weight: 800;
+    }
+
+    td {
+      color: #2a2f3d;
+    }
+
+    .data-table {
+      font-size: .86rem;
+    }
+
+    .dense-table {
+      font-size: .72rem;
+      line-height: 1.28;
+    }
+
+    .compact-table {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .group-row th {
+      background: #f0f0f8;
+      color: #3a4a7a;
+      text-align: left;
+    }
+
+    .table-note {
+      color: var(--muted);
+      margin: .7rem 0 0;
+      font-size: .86rem;
+    }
+
+    .citation-layout {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .citation-code {
+      position: relative;
+    }
+
+    .citation-box {
+      background: #10221c;
+      color: #ecf5f1;
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      font-size: .86rem;
+    }
+
+    .copy-citation {
+      position: absolute;
+      top: .75rem;
+      right: .75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .08);
+      color: #ecf5f1;
+      cursor: pointer;
+    }
+
+    .copy-citation:hover {
+      background: rgba(255, 255, 255, .16);
+    }
+
+    .citation-note {
+      color: var(--muted);
+      text-align: center;
+      margin: 1rem 0 0;
+      font-size: .9rem;
+    }
+
+    .warn {
+      background: #fff7e8;
+      border: 1px solid #f1d3a7;
+      color: #6f4712;
+      border-radius: 8px;
+      padding: .8rem;
+      margin-bottom: .9rem;
+    }
+
+    .logos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      margin-top: 1.2rem;
+    }
+
+    .logos img {
+      max-height: 34px;
+      width: auto;
+    }
+
+    footer.partners {
+      padding: 2rem 1.25rem;
+      border-top: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+    }
+
+    .partner-logos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      align-items: center;
+      justify-content: center;
+      opacity: .88;
+    }
+
+    .partner-logos img {
+      height: 48px;
+      width: auto;
+      max-width: min(360px, 100%);
+      object-fit: contain;
+    }
+
+    .partner-text {
+      text-align: center;
+      margin-top: 1.4rem;
+      font-size: .88rem;
+    }
+
+    .zoomable {
+      cursor: zoom-in;
+    }
+
+    dialog {
+      border: 0;
+      border-radius: 8px;
+      padding: 0;
+      max-width: min(1200px, 94vw);
+      background: #fff;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .28);
+    }
+
+    dialog::backdrop {
+      background: rgba(12, 20, 18, .72);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .75rem 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-head button {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: .4rem .55rem;
+    }
+
+    #modal-img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    @media (max-width: 960px) {
+
+      .hero-layout,
+      .two-col,
+      .result-pair,
+      .paired-figures {
+        grid-template-columns: 1fr;
+      }
+
+      .metrics,
+      .cards,
+      .axis-grid,
+      .takeaway-grid,
+      .decision-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .stage-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .three {
+        grid-template-columns: 1fr;
+      }
+
+      .section-head {
+        display: block;
+      }
+
+      nav {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav-links {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 720px) {
+      section {
+        padding: 3rem 1rem;
+      }
+
+      .metrics,
+      .cards,
+      .stage-grid,
+      .axis-grid,
+      .takeaway-grid,
+      .decision-grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+      }
+
+      .responsive-matrix thead {
+        display: none;
+      }
+
+      .responsive-matrix,
+      .responsive-matrix tbody,
+      .responsive-matrix tr,
+      .responsive-matrix th,
+      .responsive-matrix td {
+        display: block;
+        width: 100%;
+      }
+
+      .responsive-matrix tr {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        margin: .65rem 0;
+        overflow: visible;
+        background: #fff;
+      }
+
+      .responsive-matrix th,
+      .responsive-matrix td {
+        border: 0;
+        border-bottom: 1px solid #edf1ee;
+        padding: .5rem .65rem;
+      }
+
+      .responsive-matrix td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: .72rem;
+        color: var(--muted);
+        font-weight: 800;
+        margin-bottom: .1rem;
+      }
+
+      .responsive-matrix .group-row {
+        border: 0;
+      }
+
+      .responsive-matrix .group-row th {
+        border-radius: 8px;
+      }
+
+      .dense-table {
+        font-size: .82rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: .001ms !important;
+        transition-duration: .001ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="topbar" role="banner">
+    <nav aria-label="Primary">
+      <a class="brand" href="#hero"><img src="images/tr_optimizer/logos/web-logo.png" alt="Scaling for Scaling icon" />
+        <span>Scaling for Scaling</span></a>
+      <div class="nav-links">
+        <a href="#framework">Framework</a><a href="#taxonomy">Taxonomy</a><a href="#benchmark">Benchmark</a><a
+          href="#results">Results</a><a href="#guide">Guide</a><a href="#tables">Tables</a><a
+          href="#citation">Citation</a>
+      </div>
+    </nav>
+  </header>
+  <main id="main">
+    <section id="hero" class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-layout">
+        <div class="hero-copy">
+          <div class="kicker">Optimizer taxonomy + benchmark</div>
+          <h1 id="hero-title">Scaling for Scaling</h1>
+          <div class="title-subline">Taxonomy, Geometry, and Benchmarking of Modern Optimizers</div>
+          <p class="lead">A unified meta-pipeline, LMO-grounded geometry, and cross-domain benchmark for choosing modern
+            optimizers under compute, memory, stability, robustness, and generalization constraints.</p>
+          <p class="authors">
+            Siyuan Li<sup>1,3,†</sup>, Jiabao Pan<sup>1,2,†</sup>, Yumou Liu<sup>1,4,†</sup>, Zhuoli
+            Ouyang<sup>7,†</sup>, Xin Jin<sup>3</sup>, Xinglong Xu<sup>5</sup>, Jingxuan Wei<sup>5</sup>, Shengye
+            Pang<sup>2,*</sup>, Jintao Chen<sup>6</sup>, Xuanhe Zhou<sup>4</sup>, Conghui He<sup>1</sup>, Cheng
+            Tan<sup>1,*</sup>
+          </p>
+          <p class="affiliations">
+            <sup>1</sup>Shanghai Artificial Intelligence Laboratory · <sup>2</sup>Shanghai University ·
+            <sup>3</sup>Westlake University · <sup>4</sup>Shanghai Jiao Tong University · <sup>5</sup>UCAS ·
+            <sup>6</sup>Zhejiang University · <sup>7</sup>Southern University of Science and Technology
+          </p>
+          <p class="author-note"><sup>†</sup>Equal contribution. <sup>*</sup>Corresponding authors.</p>
+          <div class="buttons">
+            <a class="btn primary" href="https://github.com/OpenRaiser/scaling-for-scaling"><i data-lucide="github"
+                aria-hidden="true"></i>Code</a>
+            <a class="btn" href="https://huggingface.co/datasets/OpenRaiser/scaling-for-scaling"><i
+                data-lucide="database" aria-hidden="true"></i>Dataset</a>
+            <a class="btn" href="#tables"><i data-lucide="table-2" aria-hidden="true"></i>Benchmark Tables</a>
+            <a class="btn" href="#citation"><i data-lucide="quote" aria-hidden="true"></i>Cite</a>
+          </div>
+        </div>
+        <figure class="hero-card hero-figure">
+          <img class="paper-figure zoomable" src="images/tr_optimizer/logos/teaser.png"
+            alt="Overview teaser showing the Scaling for Scaling taxonomy and benchmark workflow" />
+          <figcaption>Optimizer design has moved from a single AdamW-style default into a diversified mechanism space.
+            This overview is not a leaderboard; it frames why the paper needs a shared taxonomy, geometry, and benchmark
+            protocol.</figcaption>
+        </figure>
+        <div class="metrics" aria-label="Headline scope">
+          <div class="metric"><strong>100+</strong><span>optimizer methods organized</span></div>
+          <div class="metric"><strong>24</strong><span>benchmarked optimizers</span></div>
+          <div class="metric"><strong>60M-1B</strong><span>language model scales</span></div>
+          <div class="metric"><strong>4 arch.</strong><span>standard and linear-attention models</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="framework" aria-labelledby="framework-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Framework</div>
+            <h2 id="framework-title">One optimizer step as a five-stage transformation.</h2>
+          </div>
+          <p>The paper treats optimizers as structured transformations across parameter routing, gradient
+            transformation, state evolution, update reconstruction, and finalization. Most methods do meaningful work in
+            only one or two stages, making comparison and composition easier.</p>
+        </div>
+        <div class="framework-flow">
+          <figure class="figure-frame"><img class="paper-figure zoomable" src="images/tr_optimizer/figures/pipeline.png"
+              alt="Universal meta-pipeline for a modern optimizer update" />
+            <figcaption>Universal meta-pipeline for one optimizer step. The figure is shown full-width because the stage
+              labels and tensor routes are the central visual evidence in this section.</figcaption>
+          </figure>
+          <div class="stage-grid" aria-label="Universal meta-pipeline stages">
+            <div class="stage-card"><strong>S0</strong>
+              <h3>Signal acquisition</h3>
+              <p>Receives first-order gradients, variance-reduced signals, or curvature-augmented estimates from the
+                training system.</p>
+            </div>
+            <div class="stage-card"><strong>S1</strong>
+              <h3>Parameter routing</h3>
+              <p>Partitions tensors by shape and module type so matrices, vectors, heads, or layers can follow different
+                update routes.</p>
+            </div>
+            <div class="stage-card"><strong>S2</strong>
+              <h3>Gradient transform</h3>
+              <p>Applies the mechanism that changes direction space: identity maps, sign maps, spectral
+                orthogonalization, Kronecker transforms, or low-rank projection.</p>
+            </div>
+            <div class="stage-card"><strong>S3</strong>
+              <h3>State evolution</h3>
+              <p>Maintains moment, curvature, factorized, quantized, or variance-reduced states before a direction is
+                formed.</p>
+            </div>
+            <div class="stage-card"><strong>S4</strong>
+              <h3>Reconstruction</h3>
+              <p>Returns transformed or compressed directions to the full parameter space through inverse rotations,
+                projections, or approximations.</p>
+            </div>
+            <div class="stage-card"><strong>S5</strong>
+              <h3>Finalization</h3>
+              <p>Writes the update with learning rate, weight decay, clipping, trust ratios, masks, or sharpness-aware
+                corrections.</p>
+            </div>
+          </div>
+          <div class="bridge-panel">
+            <h3>Bridge to the LMO / four-axis geometry</h3>
+            <p>The meta-pipeline locates where an optimizer intervenes. The geometric view explains what direction that
+              intervention creates: state estimation happens before geometry, and the LMO or preconditioner consumes the
+              estimated state to form the update.</p>
+            <div class="axis-grid" aria-label="LMO four-axis decomposition">
+              <div class="axis-card"><strong>Axis I</strong>
+                <h3>Update domain</h3>
+                <p>Where the update lives: full parameter space, matrix space, rotated coordinates, or a low-rank
+                  subspace.</p>
+              </div>
+              <div class="axis-card"><strong>Axis II</strong>
+                <h3>State estimator</h3>
+                <p>How momentum, second moments, Gram/Hessian proxies, variance reduction, and projection state are
+                  produced.</p>
+              </div>
+              <div class="axis-card"><strong>Axis III</strong>
+                <h3>Geometry operator</h3>
+                <p>How the state becomes a direction through an LMO constraint set or a Hessian-style preconditioner.
+                </p>
+              </div>
+              <div class="axis-card"><strong>Axis IV</strong>
+                <h3>Finalization wrapper</h3>
+                <p>How learning rate, decay, projection-back, routing fallbacks, refresh schedules, and clipping commit
+                  the direction.</p>
+              </div>
+            </div>
+          </div>
+          <div class="table-block framework-table-block">
+            <table class="data-table compact-table framework-table" data-tex-label="tab:meta_pipeline_examples">
+              <colgroup>
+                <col style="width:14%" />
+                <col style="width:15%" />
+                <col style="width:31%" />
+                <col style="width:10%" />
+                <col style="width:30%" />
+              </colgroup>
+              <caption>Representative optimizer families viewed through the universal meta-pipeline. Active stages carry
+                the defining mechanism; remaining stages reduce to identity maps or standard defaults.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Method</th>
+                  <th scope="col">Active stages</th>
+                  <th scope="col">Core mechanism</th>
+                  <th scope="col">Family</th>
+                  <th scope="col">Pipeline constraint</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row" data-label="Method">AdamW</th>
+                  <td data-label="Active stages">S3, S5</td>
+                  <td data-label="Core mechanism">First/second-order moment EMAs; decoupled weight decay</td>
+                  <td data-label="Family">T1</td>
+                  <td data-label="Pipeline constraint">S2, S4 identity; S1 uniform element-wise</td>
+                </tr>
+                <tr>
+                  <th scope="row" data-label="Method">Muon</th>
+                  <td data-label="Active stages">S1, S2</td>
+                  <td data-label="Core mechanism">Matrix routing; Newton-Schulz spectral orthogonalization</td>
+                  <td data-label="Family">T2.1</td>
+                  <td data-label="Pipeline constraint">S4 trivial (dimension-preserving); S3 standard momentum</td>
+                </tr>
+                <tr>
+                  <th scope="row" data-label="Method">GaLore</th>
+                  <td data-label="Active stages">S1-S4</td>
+                  <td data-label="Core mechanism">Low-rank projection; subspace Adam state; inverse projection</td>
+                  <td data-label="Family">T2.3</td>
+                  <td data-label="Pipeline constraint">Dual S2/S4 via basis P_t; S5 standard</td>
+                </tr>
+                <tr>
+                  <th scope="row" data-label="Method">Lion</th>
+                  <td data-label="Active stages">S2, S3</td>
+                  <td data-label="Core mechanism">Sign discretization of momentum-interpolated gradient</td>
+                  <td data-label="Family">T3</td>
+                  <td data-label="Pipeline constraint">S4 identity; no second-order state; fixed-magnitude update</td>
+                </tr>
+                <tr>
+                  <th scope="row" data-label="Method">SAM</th>
+                  <td data-label="Active stages">S0, S5</td>
+                  <td data-label="Core mechanism">Perturbation-induced gradient; neighborhood-regularized write-back
+                  </td>
+                  <td data-label="Family">T5.1</td>
+                  <td data-label="Pipeline constraint">S1-S4 execute element-wise defaults</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="taxonomy" class="band" aria-labelledby="taxonomy-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Dual taxonomy</div>
+            <h2 id="taxonomy-title">Method families meet effect objectives.</h2>
+          </div>
+          <p>The page preserves both taxonomy axes: mechanism families T1-T5 and effect objectives O1-O6. This is the
+            map used to interpret benchmark tradeoffs rather than a leaderboard-only view.</p>
+        </div>
+        <div class="cards">
+          <div class="card"><span class="tag">T1</span>
+            <h3>Element-wise adaptive moment</h3>
+            <p>Adam-style scalar control and moment estimation.</p>
+          </div>
+          <div class="card"><span class="tag">T2</span>
+            <h3>Matrix-structured methods</h3>
+            <p>Spectral, Kronecker, and subspace update directions.</p>
+          </div>
+          <div class="card"><span class="tag">T3</span>
+            <h3>Discretized directions</h3>
+            <p>Sign-like and quantized update geometry.</p>
+          </div>
+          <div class="card"><span class="tag">T4/T5</span>
+            <h3>Compression and geometry</h3>
+            <p>State reduction, curvature, perturbation, and trust-region controls.</p>
+          </div>
+        </div>
+        <div class="table-block">
+          <table class="data-table responsive-matrix" data-tex-label="tab:effect_objectives">
+            <caption>Dimension-B effect objectives and measurement sources.</caption>
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Definition</th>
+                <th scope="col">Data source</th>
+                <th scope="col">Extra cost</th>
+                <th scope="col">Typical outputs</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" data-label="ID">O1</th>
+                <td data-label="Name">Convergence Efficiency</td>
+                <td data-label="Definition">Loss reduction or target-quality attainment under fixed step, token,
+                  wall-clock, or compute budget</td>
+                <td data-label="Data source">Train/validation loss logs</td>
+                <td data-label="Extra cost">None</td>
+                <td data-label="Typical outputs">Loss at step T; steps-to-threshold; token efficiency</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="ID">O2</th>
+                <td data-label="Name">Step cost</td>
+                <td data-label="Definition">Extra optimizer computation, synchronization, or forward/backward cost
+                  relative to a baseline</td>
+                <td data-label="Data source">Timers, profiler, analytic FLOP model</td>
+                <td data-label="Extra cost">Recorded during training</td>
+                <td data-label="Typical outputs">Step time; optimizer FLOPs; extra backward count</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="ID">O3</th>
+                <td data-label="Name">Memory</td>
+                <td data-label="Definition">Memory from optimizer states, gradient buffers, temporary factors,
+                  projection bases, and quantization buffers</td>
+                <td data-label="Data source">Memory profiler, analytic byte model</td>
+                <td data-label="Extra cost">Recorded during training</td>
+                <td data-label="Typical outputs">Peak memory; persistent state bytes; temporary buffer bytes</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="ID">O4</th>
+                <td data-label="Name">Stability</td>
+                <td data-label="Definition">Robustness to spikes, divergence, overflow, and gradient fluctuations</td>
+                <td data-label="Data source">Loss and gradient-norm time series</td>
+                <td data-label="Extra cost">Offline post-processing</td>
+                <td data-label="Typical outputs">Spike frequency; gradient CV; divergence rate; completion rate</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="ID">O5</th>
+                <td data-label="Name">Hparam robustness</td>
+                <td data-label="Definition">Sensitivity across learning rate, schedule, weight decay, momentum, batch
+                  size, and method-specific knobs</td>
+                <td data-label="Data source">Multiple training runs</td>
+                <td data-label="Extra cost">Search or transfer experiments</td>
+                <td data-label="Typical outputs">Acceptable LR interval; performance variance; tuning burden</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="ID">O6</th>
+                <td data-label="Name">Generalization</td>
+                <td data-label="Definition">Quality outside the training objective, from validation to downstream, OOD,
+                  or scale-transfer evaluation</td>
+                <td data-label="Data source">Validation, downstream, OOD, scale-transfer evaluation</td>
+                <td data-label="Extra cost">Low for validation; high for full evaluation</td>
+                <td data-label="Typical outputs">Validation loss; train-val gap; downstream score; OOD retention</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-block">
+          <table class="data-table compact-table" data-tex-label="tab:taxonomy_cross_matrix">
+            <caption>Compact cross-matrix between method families and effect objectives. ``++&#x27;&#x27; denotes a
+              primary target, ``+&#x27;&#x27; a common secondary target, ``0&#x27;&#x27; protocol-dependent neutrality,
+              and ``-&#x27;&#x27; a likely cost.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Family</th>
+                <th scope="col">O1</th>
+                <th scope="col">O2</th>
+                <th scope="col">O3</th>
+                <th scope="col">O4</th>
+                <th scope="col">O5</th>
+                <th scope="col">O6</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" data-label="Family">T1 Element-wise adaptive moment and scalar control</th>
+                <td data-label="O1">++</td>
+                <td data-label="O2">0</td>
+                <td data-label="O3">-</td>
+                <td data-label="O4">+</td>
+                <td data-label="O5">+</td>
+                <td data-label="O6">0/+</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Family">T2 Matrix-level structural methods</th>
+                <td data-label="O1">++</td>
+                <td data-label="O2">-</td>
+                <td data-label="O3">-/0</td>
+                <td data-label="O4">+</td>
+                <td data-label="O5">0/+</td>
+                <td data-label="O6">0/+</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Family">T3 Discretized directions</th>
+                <td data-label="O1">+/0</td>
+                <td data-label="O2">+</td>
+                <td data-label="O3">+</td>
+                <td data-label="O4">+/0</td>
+                <td data-label="O5">0</td>
+                <td data-label="O6">0</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Family">T4 State compression</th>
+                <td data-label="O1">0/-</td>
+                <td data-label="O2">0/+</td>
+                <td data-label="O3">++</td>
+                <td data-label="O4">0/-</td>
+                <td data-label="O5">0</td>
+                <td data-label="O6">0/-</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Family">T5 Geometry regularization</th>
+                <td data-label="O1">+/0</td>
+                <td data-label="O2">-</td>
+                <td data-label="O3">0/-</td>
+                <td data-label="O4">++</td>
+                <td data-label="O5">+</td>
+                <td data-label="O6">++</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-block">
+          <table class="data-table responsive-matrix dense-table" data-tex-label="tab:opt_coverage">
+            <caption>Taxonomy and four-axis coverage of the 24 benchmarked optimizers. For each optimizer we list its
+              subclass, its four-axis coordinates (Axes I--IV of Section [ref]), and the meta-pipeline stage(s) with a
+              non-identity operation. Axis III is shown through its two equivalent readings, the LMO constraint geometry
+              and the preconditioner, which are two faces of the same direction operator _t. State estimation (Axis II)
+              absorbs momentum, the second-moment / Hessian proxy H_t, variance reduction (FO/VR/STORM), and any state
+              compression, while the update domain (Axis I) records the space in which the update lives.
+              ``full&#x27;&#x27; denotes the original coordinate space.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Optimizer</th>
+                <th scope="col">Sub.</th>
+                <th scope="col">Axis I domain</th>
+                <th scope="col">Axis II state</th>
+                <th scope="col">Axis III LMO</th>
+                <th scope="col">Axis III precond.</th>
+                <th scope="col">Axis IV finalize</th>
+                <th scope="col">Pipeline stages</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="8">T1: Element-wise Adaptive Moment Estimation</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">AdamW</th>
+                <td data-label="Sub.">T1.1</td>
+                <td data-label="Axis I domain">full</td>
+                <td data-label="Axis II state">m_t,v_t</td>
+                <td data-label="Axis III LMO">adapt.\ _ box</td>
+                <td data-label="Axis III precond.">diag(v_t), 12</td>
+                <td data-label="Axis IV finalize">LR + dec.\ WD</td>
+                <td data-label="Pipeline stages">S3/S5</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">RAdam</th>
+                <td data-label="Sub.">T1.1</td>
+                <td data-label="Axis I domain">full</td>
+                <td data-label="Axis II state">m_t,v_t rect.</td>
+                <td data-label="Axis III LMO">adapt.\ _ box</td>
+                <td data-label="Axis III precond.">diag(v_t), 12</td>
+                <td data-label="Axis IV finalize">rect.\ warmup + WD</td>
+                <td data-label="Pipeline stages">S3/S5</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">NAdam</th>
+                <td data-label="Sub.">T1.1</td>
+                <td data-label="Axis I domain">full</td>
+                <td data-label="Axis II state">Nesterov m_t,v_t</td>
+                <td data-label="Axis III LMO">adapt.\ _ box</td>
+                <td data-label="Axis III precond.">diag(v_t), 12</td>
+                <td data-label="Axis IV finalize">lookahead + WD</td>
+                <td data-label="Pipeline stages">S3/S5</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">AdaBelief</th>
+                <td data-label="Sub.">T1.1</td>
+                <td data-label="Axis I domain">full</td>
+                <td data-label="Axis II state">m_t, belief s_t</td>
+                <td data-label="Axis III LMO">adapt.\ _ box</td>
+                <td data-label="Axis III precond.">diag(s_t), 12</td>
+                <td data-label="Axis IV finalize">LR + WD</td>
+                <td data-label="Pipeline stages">S3/S5</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Adan</th>
+                <td data-label="Sub.">T1.1</td>
+                <td data-label="Axis I domain">full</td>
+                <td data-label="Axis II state">m_t,v_t grad-diff (VR)</td>
+                <td data-label="Axis III LMO">adapt.\ _ box</td>
+                <td data-label="Axis III precond.">diag(v_t), 12</td>
+                <td data-label="Axis IV finalize">LR + WD</td>
+                <td data-label="Pipeline stages">S3/S5</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">MARS-AdamW</th>
+                <td data-label="Sub.">T1.2</td>
+                <td data-label="Axis I domain">full</td>
+                <td data-label="Axis II state">c_t,m_t,v_t (STORM)</td>
+                <td data-label="Axis III LMO">adapt.\ _ box</td>
+                <td data-label="Axis III precond.">diag(v_t), 12</td>
+                <td data-label="Axis IV finalize">LR + dec.\ WD</td>
+                <td data-label="Pipeline stages">S0/S3</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Prodigy</th>
+                <td data-label="Sub.">T1.3</td>
+                <td data-label="Axis I domain">full</td>
+                <td data-label="Axis II state">m_t,v_t,d_t</td>
+                <td data-label="Axis III LMO">adapt.\ _ box</td>
+                <td data-label="Axis III precond.">diag(v_t), 12</td>
+                <td data-label="Axis IV finalize">auto-LR + WD</td>
+                <td data-label="Pipeline stages">S3/S5</td>
+              </tr>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="8">T2: Matrix-Structured Methods</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Muon</th>
+                <td data-label="Sub.">T2.1</td>
+                <td data-label="Axis I domain">matrix (U,V)</td>
+                <td data-label="Axis II state">M_t, H_t=M_tM_t^</td>
+                <td data-label="Axis III LMO">spectral polar UV^</td>
+                <td data-label="Axis III precond.">H_t, 12</td>
+                <td data-label="Axis IV finalize">LR + matrix routing</td>
+                <td data-label="Pipeline stages">S1/S2</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">RMNP</th>
+                <td data-label="Sub.">T2.1</td>
+                <td data-label="Axis I domain">matrix (row-wise)</td>
+                <td data-label="Axis II state">M_t, H_t=diag(M_tM_t^)</td>
+                <td data-label="Axis III LMO">row normalization</td>
+                <td data-label="Axis III precond.">H_t, 12</td>
+                <td data-label="Axis IV finalize">LR + matrix routing</td>
+                <td data-label="Pipeline stages">S1/S2</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Shampoo</th>
+                <td data-label="Sub.">T2.2</td>
+                <td data-label="Axis I domain">Kron (Q_L,Q_R)</td>
+                <td data-label="Axis II state">m_t, Kron L_t,R_t</td>
+                <td data-label="Axis III LMO">metric-ball steepest</td>
+                <td data-label="Axis III precond.">Kron-Fisher, 14</td>
+                <td data-label="Axis IV finalize">LR + damping</td>
+                <td data-label="Pipeline stages">S1/S2/S3/S4</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">SOAP</th>
+                <td data-label="Sub.">T2.2</td>
+                <td data-label="Axis I domain">Kron eigen (Q_L,Q_R)</td>
+                <td data-label="Axis II state">m_t,v_t, Kron</td>
+                <td data-label="Axis III LMO">box in eigenbasis</td>
+                <td data-label="Axis III precond.">rotated diag, 12</td>
+                <td data-label="Axis IV finalize">LR + WD</td>
+                <td data-label="Pipeline stages">S1/S2/S3/S4</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">MARS-Shampoo</th>
+                <td data-label="Sub.">T2.2</td>
+                <td data-label="Axis I domain">Kron (Q_L,Q_R)</td>
+                <td data-label="Axis II state">c_t,m_t, Kron (STORM)</td>
+                <td data-label="Axis III LMO">metric-ball (VR)</td>
+                <td data-label="Axis III precond.">rotated diag, 12</td>
+                <td data-label="Axis IV finalize">LR + damping</td>
+                <td data-label="Pipeline stages">S0/S1/S2/S3/S4</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">GaLore</th>
+                <td data-label="Sub.">T2.3</td>
+                <td data-label="Axis I domain">subspace (Q_L,Q_R)</td>
+                <td data-label="Axis II state">m_t, v_t (proj.)</td>
+                <td data-label="Axis III LMO">projected adapt.\ box</td>
+                <td data-label="Axis III precond.">diag( v_t), 12</td>
+                <td data-label="Axis IV finalize">proj-back + WD</td>
+                <td data-label="Pipeline stages">S2/S3/S4</td>
+              </tr>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="8">T3: Discretized &amp; Quantized Directions</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Lion</th>
+                <td data-label="Sub.">T3</td>
+                <td data-label="Axis I domain">full</td>
+                <td data-label="Axis II state">sign-mom.\ EMAs</td>
+                <td data-label="Axis III LMO">fixed _ box</td>
+                <td data-label="Axis III precond.">sign self-norm (I,0)</td>
+                <td data-label="Axis IV finalize">LR + WD</td>
+                <td data-label="Pipeline stages">S2/S3</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">MARS-Lion</th>
+                <td data-label="Sub.">T3</td>
+                <td data-label="Axis I domain">full</td>
+                <td data-label="Axis II state">c_t, sign-mom (STORM)</td>
+                <td data-label="Axis III LMO">fixed _ box (VR)</td>
+                <td data-label="Axis III precond.">sign self-norm (I,0)</td>
+                <td data-label="Axis IV finalize">LR + WD</td>
+                <td data-label="Pipeline stages">S0/S2/S3</td>
+              </tr>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="8">T4: State-Compressed Optimization</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Adafactor</th>
+                <td data-label="Sub.">T4.1</td>
+                <td data-label="Axis I domain">full, factored</td>
+                <td data-label="Axis II state">row/col 2nd-mom factors</td>
+                <td data-label="Axis III LMO">adapt.\ coord box</td>
+                <td data-label="Axis III precond.">factored diag, 12</td>
+                <td data-label="Axis IV finalize">LR + factored upd.</td>
+                <td data-label="Pipeline stages">S3</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">CAME</th>
+                <td data-label="Sub.">T4.1</td>
+                <td data-label="Axis I domain">full, factored</td>
+                <td data-label="Axis II state">factors + confidence</td>
+                <td data-label="Axis III LMO">adapt.\ coord box</td>
+                <td data-label="Axis III precond.">factored diag + conf.</td>
+                <td data-label="Axis IV finalize">LR + conf.\ corr.</td>
+                <td data-label="Pipeline stages">S3</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Adam8bit</th>
+                <td data-label="Sub.">T4.2</td>
+                <td data-label="Axis I domain">full, INT8 state</td>
+                <td data-label="Axis II state">quant.\ m_t,v_t</td>
+                <td data-label="Axis III LMO">adapt.\ _ box</td>
+                <td data-label="Axis III precond.">diag(v_t) INT8, 12</td>
+                <td data-label="Axis IV finalize">dequant + WD</td>
+                <td data-label="Pipeline stages">S3</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Adam-mini</th>
+                <td data-label="Sub.">T4.3</td>
+                <td data-label="Axis I domain">block-struct.</td>
+                <td data-label="Axis II state">block-shared m_t,v_t</td>
+                <td data-label="Axis III LMO">block adapt.\ box</td>
+                <td data-label="Axis III precond.">block-mean diag, 12</td>
+                <td data-label="Axis IV finalize">LR + WD</td>
+                <td data-label="Pipeline stages">S1/S3</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">APOLLO</th>
+                <td data-label="Sub.">T4.3</td>
+                <td data-label="Axis I domain">rand-proj state</td>
+                <td data-label="Axis II state">projected estimator</td>
+                <td data-label="Axis III LMO">projected adapt.\ box</td>
+                <td data-label="Axis III precond.">proj.\ diag, 12</td>
+                <td data-label="Axis IV finalize">proj-back + LR</td>
+                <td data-label="Pipeline stages">S1/S3</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Conda</th>
+                <td data-label="Sub.">T4.3</td>
+                <td data-label="Axis I domain">block-struct.</td>
+                <td data-label="Axis II state">block-shared m_t,v_t</td>
+                <td data-label="Axis III LMO">block adapt.\ box</td>
+                <td data-label="Axis III precond.">block-mean diag, 12</td>
+                <td data-label="Axis IV finalize">LR + WD</td>
+                <td data-label="Pipeline stages">S1/S3</td>
+              </tr>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="8">T5: Curvature-Aware &amp; Geometry-Regularized</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Sophia</th>
+                <td data-label="Sub.">T5.2</td>
+                <td data-label="Axis I domain">full</td>
+                <td data-label="Axis II state">m_t, Hutch.\ HVP</td>
+                <td data-label="Axis III LMO">clipped local geom.</td>
+                <td data-label="Axis III precond.">Hutchinson, 1</td>
+                <td data-label="Axis IV finalize">LR + WD</td>
+                <td data-label="Pipeline stages">S3/S5</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">AdamP</th>
+                <td data-label="Sub.">T5.3</td>
+                <td data-label="Axis I domain">full</td>
+                <td data-label="Axis II state">m_t,v_t</td>
+                <td data-label="Axis III LMO">adapt.\ _ box</td>
+                <td data-label="Axis III precond.">diag(v_t), 12</td>
+                <td data-label="Axis IV finalize">radial proj. + WD</td>
+                <td data-label="Pipeline stages">S5</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">LAMB</th>
+                <td data-label="Sub.">T5.4</td>
+                <td data-label="Axis I domain">full</td>
+                <td data-label="Axis II state">m_t,v_t</td>
+                <td data-label="Axis III LMO">adapt.\ _ box</td>
+                <td data-label="Axis III precond.">diag(v_t), 12</td>
+                <td data-label="Axis IV finalize">trust-ratio + WD</td>
+                <td data-label="Pipeline stages">S1/S5</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="benchmark" aria-labelledby="benchmark-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Benchmark evidence</div>
+            <h2 id="benchmark-title">Cross-scenario evidence, not one-setting ranking.</h2>
+          </div>
+          <p>The webpage foregrounds the evidence used by the paper's optimizer-choice argument: Stage-1 C4
+            quality/runtime/memory trade-offs, Stage-2 FineWeb-Edu long-context transfer, and auxiliary O4/O5 stability
+            and robustness probes.</p>
+        </div>
+        <div>
+          <figure class="figure-frame"><img class="paper-figure zoomable"
+              src="images/tr_optimizer/figures/pareto-1b-advance.png"
+              alt="Stage-1 Pareto frontiers for 1B models comparing perplexity with runtime and optimizer memory" />
+            <figcaption>Stage-1 1B Pareto frontiers: lower-left is better for PPL versus runtime and optimizer-state
+              memory.</figcaption>
+          </figure>
+          <div class="takeaway-grid" aria-label="Benchmark evidence takeaways">
+            <div class="takeaway"><strong>Quality frontier</strong>
+              <p>APOLLO, Muon, MARS-Shampoo, and RMNP are competitive on short-context C4, but they occupy different
+                cost regions.</p>
+            </div>
+            <div class="takeaway"><strong>Runtime frontier</strong>
+              <p>Lion and AdamW are cheap; RMNP is the practical matrix-structured exception close to the efficient
+                frontier.</p>
+            </div>
+            <div class="takeaway"><strong>Memory frontier</strong>
+              <p>Adafactor, APOLLO, and GaLore reduce optimizer state, but memory wins do not automatically transfer to
+                harder regimes.</p>
+            </div>
+            <div class="takeaway"><strong>Transfer frontier</strong>
+              <p>FineWeb-Edu 32k turns optimizer choice into a cross-architecture stability question rather than an
+                absolute PPL ranking.</p>
+            </div>
+          </div>
+          <div class="paired-figures">
+            <figure class="figure-frame"><img class="paper-figure zoomable"
+                src="images/tr_optimizer/figures/heatmap-24opt.png"
+                alt="Optimizer-level heatmap of C4 perplexity runtime and memory for 24 optimizers" />
+              <figcaption>Stage-1 optimizer-level heatmap of C4 PPL, runtime, and memory. It shows why the short-context
+                screen is multi-objective rather than a flat leaderboard.</figcaption>
+            </figure>
+            <figure class="figure-frame"><img class="paper-figure zoomable"
+                src="images/tr_optimizer/figures/rank-stability-v2.png"
+                alt="Rank stability across optimizers and architectures in FineWeb-Edu long-context scenarios" />
+              <figcaption>Stage-2 cross-scenario rank stability under FineWeb-Edu 32k. SOAP transfers most consistently;
+                APOLLO's short-context strength does not survive this setting.</figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="results" class="band" aria-labelledby="results-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Findings</div>
+            <h2 id="results-title">No optimizer dominates every objective frontier.</h2>
+          </div>
+          <p>Structured-matrix methods transfer stably but can be expensive; state-compressed methods can win memory
+            under short contexts but degrade as input complexity grows; rankings cross systematically across domains.
+          </p>
+        </div>
+        <div class="takeaway-grid" aria-label="Result takeaways">
+          <div class="takeaway"><strong>SOAP</strong>
+            <p>Strongest long-context cross-scenario quality, but its runtime and optimizer-state memory make it a
+              quality ceiling, not a default.</p>
+          </div>
+          <div class="takeaway"><strong>RMNP / Muon</strong>
+            <p>Matrix geometry is useful but architecture-aware: RMNP is the balanced option, while Muon is
+              mechanistically interpretable.</p>
+          </div>
+          <div class="takeaway"><strong>APOLLO / Adafactor</strong>
+            <p>State compression is attractive under memory pressure, but APOLLO's short-context win collapses under
+              long context.</p>
+          </div>
+          <div class="takeaway"><strong>AdamW / Lion</strong>
+            <p>AdamW remains the stable reference anchor; Lion is cheap for exploration but carries an expected quality
+              gap.</p>
+          </div>
+        </div>
+        <div class="findings-flow">
+          <figure class="figure-frame"><img class="paper-figure zoomable"
+              src="images/tr_optimizer/figures/heatmap-family.png"
+              alt="Family-level objective summary over six optimizer objectives" />
+            <figcaption>Family-level objective summary over O1-O6, connecting measured quality, runtime, memory,
+              stability, robustness, and generalization back to the optimizer-family taxonomy.</figcaption>
+          </figure>
+          <div class="paired-figures">
+            <figure class="figure-frame"><img class="paper-figure zoomable"
+                src="images/tr_optimizer/figures/fig-o4-heatmap.png"
+                alt="Gradient-norm stability heatmap across optimizers and architectures" />
+              <figcaption>Auxiliary O4 stability analysis from gradient-norm dynamics: smooth training, final PPL, and
+                transfer are related but distinct objectives.</figcaption>
+            </figure>
+            <figure class="figure-frame"><img class="paper-figure zoomable" src="images/tr_optimizer/figures/fig-o5.png"
+                alt="Learning-rate perturbation robustness panels for optimizer sensitivity" />
+              <figcaption>O5 learning-rate perturbation robustness: tuned quality can hide sharp sensitivity when the
+                learning rate is misspecified.</figcaption>
+            </figure>
+          </div>
+          <figure class="figure-frame"><img class="paper-figure zoomable"
+              src="images/tr_optimizer/figures/muon-ablation-c4-350m.png"
+              alt="Mechanistic ablation of Muon on C4 350M showing core operations gain operations and ordering constraints" />
+            <figcaption>Mechanistic ablation of Muon on C4 350M. The full-width placement keeps the core recovery, gain
+              design, and operator-order blocks readable.</figcaption>
+          </figure>
+          <div class="table-block narrow-table-block">
+            <table class="data-table compact-table" data-tex-label="tab:muon_cross_validation">
+              <caption>Cross-scale/architecture validation of Muon&#x27;s gain operations. Standard Muon, symmetric
+                two-way LR scaling, post-NS Nesterov, and their combination; lower PPL is better. Gains stack on the
+                standard Transformer but not on Gated DeltaNet.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Scenario</th>
+                  <th scope="col">Standard Muon</th>
+                  <th scope="col">Symmetric LR Scaling</th>
+                  <th scope="col">Post-NS Nesterov</th>
+                  <th scope="col">Both combined</th>
+                  <th scope="col">Best config.</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="group-row">
+                  <th scope="rowgroup" colspan="6">Standard Transformer: gains are stackable</th>
+                </tr>
+                <tr>
+                  <th scope="row" data-label="Scenario">C4-LLaMA3, 350M</th>
+                  <td data-label="Standard Muon">16.60</td>
+                  <td data-label="Symmetric LR Scaling">16.52</td>
+                  <td data-label="Post-NS Nesterov">16.57</td>
+                  <td data-label="Both combined">16.51</td>
+                  <td data-label="Best config.">Both combined</td>
+                </tr>
+                <tr>
+                  <th scope="row" data-label="Scenario">C4-LLaMA3, 1B</th>
+                  <td data-label="Standard Muon">13.72</td>
+                  <td data-label="Symmetric LR Scaling">13.64</td>
+                  <td data-label="Post-NS Nesterov">13.64</td>
+                  <td data-label="Both combined">13.58</td>
+                  <td data-label="Best config.">Both combined</td>
+                </tr>
+                <tr class="group-row">
+                  <th scope="rowgroup" colspan="6">Linear attention: stacking effect disappears</th>
+                </tr>
+                <tr>
+                  <th scope="row" data-label="Scenario">FineWeb-Edu-32k, GDN-340M</th>
+                  <td data-label="Standard Muon">24.26</td>
+                  <td data-label="Symmetric LR Scaling">24.02</td>
+                  <td data-label="Post-NS Nesterov">24.12</td>
+                  <td data-label="Both combined">24.12</td>
+                  <td data-label="Best config.">Symmetric LR Scaling</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="guide" aria-labelledby="guide-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Decision guide</div>
+            <h2 id="guide-title">Choose the optimizer by the binding constraint.</h2>
+          </div>
+          <p>The paper's conclusion is not a single global winner. It is a constraint-matched decision rule: start from
+            AdamW, then move only when quality, runtime, memory, stability, or cross-scenario transfer demands a
+            different mechanism.</p>
+        </div>
+        <div class="decision-grid" aria-label="Optimizer selection recommendations">
+          <div class="decision-card primary-pick"><strong>Reference anchor</strong>
+            <h3>AdamW</h3>
+            <p>Use as the default baseline for general-purpose LLM pretraining: stable, inexpensive, interpretable, and
+              the reference every other optimizer should beat.</p>
+          </div>
+          <div class="decision-card primary-pick"><strong>Quality-efficiency balance</strong>
+            <h3>RMNP</h3>
+            <p>Best practical alternative when a matrix-structured method is needed without the prohibitive runtime and
+              memory cost of heavier preconditioners.</p>
+          </div>
+          <div class="decision-card"><strong>Quality ceiling</strong>
+            <h3>SOAP</h3>
+            <p>Strongest long-context cross-architecture quality profile, useful when final quality dominates and
+              compute/memory are not the bottleneck.</p>
+          </div>
+          <div class="decision-card"><strong>Mechanism analysis</strong>
+            <h3>Muon</h3>
+            <p>Strong and transparent matrix-structured optimizer, but its behavior is topology-dependent and should be
+              validated on the target architecture.</p>
+          </div>
+          <div class="decision-card"><strong>Memory pressure</strong>
+            <h3>Adafactor / APOLLO</h3>
+            <p>Adafactor is the safer low-memory baseline. APOLLO is high reward but high risk: strong at short context,
+              weak under long-context transfer.</p>
+          </div>
+          <div class="decision-card"><strong>Exploration budget</strong>
+            <h3>Lion</h3>
+            <p>Cheap exploratory option with low per-step overhead, but the paper treats the quality gap as expected
+              rather than incidental.</p>
+          </div>
+        </div>
+        <div class="table-block">
+          <table class="data-table compact-table" data-tex-label="tab:optimizer_tiers">
+            <caption>Tiered classification of the benchmarked optimizers.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Tier</th>
+                <th scope="col">Optimizers</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" data-label="Tier">Tier I</th>
+                <td data-label="Optimizers">Muon, RMNP, AdamW</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Tier">Tier II</th>
+                <td data-label="Optimizers">MARS-Lion, MARS-Shampoo, APOLLO, Conda, AdamP, MARS-AdamW, SOAP, Adan, Lion
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Tier">Tier III</th>
+                <td data-label="Optimizers">RAdam, NAdam, Prodigy, AdaBelief, GaLore, Shampoo, Adam8bit, CAME,
+                  Adafactor, Adam-mini, LAMB, Sophia</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tables" aria-labelledby="tables-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Full evidence tables</div>
+            <h2 id="tables-title">Central benchmark tables are preserved in full.</h2>
+          </div>
+          <p>Wide paper tables are rendered as responsive HTML tables with all source rows and columns. On narrow
+            screens, rows turn into labeled cards instead of requiring horizontal scroll.</p>
+        </div>
+        <div class="table-block">
+          <table class="data-table responsive-matrix dense-table" data-tex-label="tab:c4_llama3_full_screening">
+            <caption>Stage-1 screening on C4 (LLaMA-3, seq.\ 256). C4 validation PPL, optimizer-state memory (Mem), and
+              per-step runtime (T) at four scales; lower is better. Grouped by family, sorted by 1B PPL.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Optimizer</th>
+                <th scope="col">Venue</th>
+                <th scope="col">60M PPL</th>
+                <th scope="col">60M Mem GB</th>
+                <th scope="col">60M T ms</th>
+                <th scope="col">130M PPL</th>
+                <th scope="col">130M Mem GB</th>
+                <th scope="col">130M T ms</th>
+                <th scope="col">350M PPL</th>
+                <th scope="col">350M Mem GB</th>
+                <th scope="col">350M T ms</th>
+                <th scope="col">1B PPL</th>
+                <th scope="col">1B Mem GB</th>
+                <th scope="col">1B T ms</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="14">Element-wise Adaptive Moment Estimation</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Adan</th>
+                <td data-label="Venue">TPAMI&#x27;23</td>
+                <td data-label="60M PPL">30.25</td>
+                <td data-label="60M Mem GB">0.433</td>
+                <td data-label="60M T ms">2.32</td>
+                <td data-label="130M PPL">22.84</td>
+                <td data-label="130M Mem GB">1.000</td>
+                <td data-label="130M T ms">4.72</td>
+                <td data-label="350M PPL">17.29</td>
+                <td data-label="350M Mem GB">2.742</td>
+                <td data-label="350M T ms">12.06</td>
+                <td data-label="1B PPL">14.35</td>
+                <td data-label="1B Mem GB">9.977</td>
+                <td data-label="1B T ms">39.67</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">RAdam</th>
+                <td data-label="Venue">ICLR&#x27;20</td>
+                <td data-label="60M PPL">30.12</td>
+                <td data-label="60M Mem GB">0.217</td>
+                <td data-label="60M T ms">1.53</td>
+                <td data-label="130M PPL">23.22</td>
+                <td data-label="130M Mem GB">0.500</td>
+                <td data-label="130M T ms">3.07</td>
+                <td data-label="350M PPL">17.34</td>
+                <td data-label="350M Mem GB">1.371</td>
+                <td data-label="350M T ms">7.64</td>
+                <td data-label="1B PPL">14.47</td>
+                <td data-label="1B Mem GB">4.989</td>
+                <td data-label="1B T ms">23.79</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">AdamW</th>
+                <td data-label="Venue">ICLR&#x27;19</td>
+                <td data-label="60M PPL">30.08</td>
+                <td data-label="60M Mem GB">0.217</td>
+                <td data-label="60M T ms">1.14</td>
+                <td data-label="130M PPL">23.18</td>
+                <td data-label="130M Mem GB">0.500</td>
+                <td data-label="130M T ms">2.31</td>
+                <td data-label="350M PPL">17.32</td>
+                <td data-label="350M Mem GB">1.371</td>
+                <td data-label="350M T ms">5.97</td>
+                <td data-label="1B PPL">14.48</td>
+                <td data-label="1B Mem GB">4.989</td>
+                <td data-label="1B T ms">18.62</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">NAdam</th>
+                <td data-label="Venue">ICLR&#x27;18</td>
+                <td data-label="60M PPL">33.72</td>
+                <td data-label="60M Mem GB">0.217</td>
+                <td data-label="60M T ms">3.45</td>
+                <td data-label="130M PPL">24.51</td>
+                <td data-label="130M Mem GB">0.500</td>
+                <td data-label="130M T ms">4.93</td>
+                <td data-label="350M PPL">17.90</td>
+                <td data-label="350M Mem GB">1.371</td>
+                <td data-label="350M T ms">9.96</td>
+                <td data-label="1B PPL">14.67</td>
+                <td data-label="1B Mem GB">4.989</td>
+                <td data-label="1B T ms">20.91</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">MARS-AdamW</th>
+                <td data-label="Venue">ICML&#x27;25</td>
+                <td data-label="60M PPL">30.01</td>
+                <td data-label="60M Mem GB">0.325</td>
+                <td data-label="60M T ms">7.62</td>
+                <td data-label="130M PPL">22.86</td>
+                <td data-label="130M Mem GB">0.750</td>
+                <td data-label="130M T ms">11.05</td>
+                <td data-label="350M PPL">16.95</td>
+                <td data-label="350M Mem GB">2.057</td>
+                <td data-label="350M T ms">22.12</td>
+                <td data-label="1B PPL">14.90</td>
+                <td data-label="1B Mem GB">7.483</td>
+                <td data-label="1B T ms">34.70</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Prodigy</th>
+                <td data-label="Venue">ICML&#x27;23</td>
+                <td data-label="60M PPL">33.44</td>
+                <td data-label="60M Mem GB">0.433</td>
+                <td data-label="60M T ms">8.36</td>
+                <td data-label="130M PPL">24.13</td>
+                <td data-label="130M Mem GB">1.000</td>
+                <td data-label="130M T ms">12.29</td>
+                <td data-label="350M PPL">18.27</td>
+                <td data-label="350M Mem GB">2.742</td>
+                <td data-label="350M T ms">24.30</td>
+                <td data-label="1B PPL">15.61</td>
+                <td data-label="1B Mem GB">9.977</td>
+                <td data-label="1B T ms">36.78</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">AdaBelief</th>
+                <td data-label="Venue">NeurIPS&#x27;20</td>
+                <td data-label="60M PPL">30.08</td>
+                <td data-label="60M Mem GB">0.433</td>
+                <td data-label="60M T ms">5.76</td>
+                <td data-label="130M PPL">23.45</td>
+                <td data-label="130M Mem GB">1.000</td>
+                <td data-label="130M T ms">8.55</td>
+                <td data-label="350M PPL">17.61</td>
+                <td data-label="350M Mem GB">2.742</td>
+                <td data-label="350M T ms">19.10</td>
+                <td data-label="1B PPL">16.79</td>
+                <td data-label="1B Mem GB">9.977</td>
+                <td data-label="1B T ms">55.48</td>
+              </tr>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="14">Matrix-Structured Methods</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">MARS-Shampoo</th>
+                <td data-label="Venue">ICML&#x27;25</td>
+                <td data-label="60M PPL">30.03</td>
+                <td data-label="60M Mem GB">0.325</td>
+                <td data-label="60M T ms">26.27</td>
+                <td data-label="130M PPL">22.56</td>
+                <td data-label="130M Mem GB">0.750</td>
+                <td data-label="130M T ms">37.94</td>
+                <td data-label="350M PPL">16.82</td>
+                <td data-label="350M Mem GB">2.057</td>
+                <td data-label="350M T ms">78.71</td>
+                <td data-label="1B PPL">13.72</td>
+                <td data-label="1B Mem GB">7.483</td>
+                <td data-label="1B T ms">513.7</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Muon</th>
+                <td data-label="Venue">arXiv&#x27;25</td>
+                <td data-label="60M PPL">28.26</td>
+                <td data-label="60M Mem GB">0.109</td>
+                <td data-label="60M T ms">21.01</td>
+                <td data-label="130M PPL">21.81</td>
+                <td data-label="130M Mem GB">0.250</td>
+                <td data-label="130M T ms">30.48</td>
+                <td data-label="350M PPL">16.61</td>
+                <td data-label="350M Mem GB">0.686</td>
+                <td data-label="350M T ms">61.66</td>
+                <td data-label="1B PPL">13.73</td>
+                <td data-label="1B Mem GB">2.495</td>
+                <td data-label="1B T ms">379.0</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">RMNP</th>
+                <td data-label="Venue">ICML&#x27;26</td>
+                <td data-label="60M PPL">29.88</td>
+                <td data-label="60M Mem GB">0.109</td>
+                <td data-label="60M T ms">3.26</td>
+                <td data-label="130M PPL">22.54</td>
+                <td data-label="130M Mem GB">0.250</td>
+                <td data-label="130M T ms">4.63</td>
+                <td data-label="350M PPL">16.85</td>
+                <td data-label="350M Mem GB">0.686</td>
+                <td data-label="350M T ms">9.32</td>
+                <td data-label="1B PPL">13.87</td>
+                <td data-label="1B Mem GB">2.495</td>
+                <td data-label="1B T ms">16.94</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">SOAP</th>
+                <td data-label="Venue">arXiv&#x27;24</td>
+                <td data-label="60M PPL">29.47</td>
+                <td data-label="60M Mem GB">0.731</td>
+                <td data-label="60M T ms">50.58</td>
+                <td data-label="130M PPL">22.67</td>
+                <td data-label="130M Mem GB">2.214</td>
+                <td data-label="130M T ms">110.4</td>
+                <td data-label="350M PPL">17.14</td>
+                <td data-label="350M Mem GB">7.465</td>
+                <td data-label="350M T ms">302.5</td>
+                <td data-label="1B PPL">14.04</td>
+                <td data-label="1B Mem GB">29.299</td>
+                <td data-label="1B T ms">1371.5</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">GaLore</th>
+                <td data-label="Venue">ICML&#x27;24</td>
+                <td data-label="60M PPL">34.56</td>
+                <td data-label="60M Mem GB">0.062</td>
+                <td data-label="60M T ms">4.21</td>
+                <td data-label="130M PPL">25.32</td>
+                <td data-label="130M Mem GB">0.199</td>
+                <td data-label="130M T ms">5.88</td>
+                <td data-label="350M PPL">19.18</td>
+                <td data-label="350M Mem GB">0.426</td>
+                <td data-label="350M T ms">11.85</td>
+                <td data-label="1B PPL">14.29</td>
+                <td data-label="1B Mem GB">0.790</td>
+                <td data-label="1B T ms">15.29</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Shampoo</th>
+                <td data-label="Venue">arXiv&#x27;18</td>
+                <td data-label="60M PPL">30.22</td>
+                <td data-label="60M Mem GB">0.217</td>
+                <td data-label="60M T ms">22.36</td>
+                <td data-label="130M PPL">22.56</td>
+                <td data-label="130M Mem GB">0.500</td>
+                <td data-label="130M T ms">33.27</td>
+                <td data-label="350M PPL">17.03</td>
+                <td data-label="350M Mem GB">1.371</td>
+                <td data-label="350M T ms">66.05</td>
+                <td data-label="1B PPL">14.29</td>
+                <td data-label="1B Mem GB">4.989</td>
+                <td data-label="1B T ms">389.4</td>
+              </tr>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="14">Discretized &amp; Quantized Directions</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">MARS-Lion</th>
+                <td data-label="Venue">ICML&#x27;25</td>
+                <td data-label="60M PPL">32.41</td>
+                <td data-label="60M Mem GB">0.325</td>
+                <td data-label="60M T ms">5.72</td>
+                <td data-label="130M PPL">25.68</td>
+                <td data-label="130M Mem GB">0.750</td>
+                <td data-label="130M T ms">8.49</td>
+                <td data-label="350M PPL">18.78</td>
+                <td data-label="350M Mem GB">2.057</td>
+                <td data-label="350M T ms">17.11</td>
+                <td data-label="1B PPL">15.73</td>
+                <td data-label="1B Mem GB">7.483</td>
+                <td data-label="1B T ms">24.77</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Lion</th>
+                <td data-label="Venue">arXiv&#x27;23</td>
+                <td data-label="60M PPL">35.94</td>
+                <td data-label="60M Mem GB">0.109</td>
+                <td data-label="60M T ms">2.07</td>
+                <td data-label="130M PPL">25.56</td>
+                <td data-label="130M Mem GB">0.250</td>
+                <td data-label="130M T ms">3.01</td>
+                <td data-label="350M PPL">19.30</td>
+                <td data-label="350M Mem GB">0.686</td>
+                <td data-label="350M T ms">5.80</td>
+                <td data-label="1B PPL">17.02</td>
+                <td data-label="1B Mem GB">2.494</td>
+                <td data-label="1B T ms">12.48</td>
+              </tr>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="14">State-Compressed Optimization</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">APOLLO</th>
+                <td data-label="Venue">MLSys&#x27;25</td>
+                <td data-label="60M PPL">30.86</td>
+                <td data-label="60M Mem GB">0.062</td>
+                <td data-label="60M T ms">8.62</td>
+                <td data-label="130M PPL">22.74</td>
+                <td data-label="130M Mem GB">0.149</td>
+                <td data-label="130M T ms">12.65</td>
+                <td data-label="350M PPL">16.43</td>
+                <td data-label="350M Mem GB">0.426</td>
+                <td data-label="350M T ms">26.21</td>
+                <td data-label="1B PPL">13.53</td>
+                <td data-label="1B Mem GB">0.790</td>
+                <td data-label="1B T ms">28.65</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Conda</th>
+                <td data-label="Venue">arXiv&#x27;25</td>
+                <td data-label="60M PPL">28.65</td>
+                <td data-label="60M Mem GB">0.245</td>
+                <td data-label="60M T ms">4.88</td>
+                <td data-label="130M PPL">21.91</td>
+                <td data-label="130M Mem GB">0.595</td>
+                <td data-label="130M T ms">7.11</td>
+                <td data-label="350M PPL">16.45</td>
+                <td data-label="350M Mem GB">1.703</td>
+                <td data-label="350M T ms">13.90</td>
+                <td data-label="1B PPL">14.25</td>
+                <td data-label="1B Mem GB">6.317</td>
+                <td data-label="1B T ms">62.33</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Adam8bit</th>
+                <td data-label="Venue">ICLR&#x27;22</td>
+                <td data-label="60M PPL">30.46</td>
+                <td data-label="60M Mem GB">0.110</td>
+                <td data-label="60M T ms">4.11</td>
+                <td data-label="130M PPL">23.30</td>
+                <td data-label="130M Mem GB">0.254</td>
+                <td data-label="130M T ms">7.27</td>
+                <td data-label="350M PPL">17.67</td>
+                <td data-label="350M Mem GB">0.697</td>
+                <td data-label="350M T ms">16.89</td>
+                <td data-label="1B PPL">14.53</td>
+                <td data-label="1B Mem GB">2.534</td>
+                <td data-label="1B T ms">42.38</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">CAME</th>
+                <td data-label="Venue">ACL&#x27;23</td>
+                <td data-label="60M PPL">31.40</td>
+                <td data-label="60M Mem GB">0.218</td>
+                <td data-label="60M T ms">14.99</td>
+                <td data-label="130M PPL">23.79</td>
+                <td data-label="130M Mem GB">0.502</td>
+                <td data-label="130M T ms">21.76</td>
+                <td data-label="350M PPL">17.60</td>
+                <td data-label="350M Mem GB">1.376</td>
+                <td data-label="350M T ms">44.89</td>
+                <td data-label="1B PPL">14.53</td>
+                <td data-label="1B Mem GB">4.997</td>
+                <td data-label="1B T ms">87.46</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Adafactor</th>
+                <td data-label="Venue">ICML&#x27;18</td>
+                <td data-label="60M PPL">30.00</td>
+                <td data-label="60M Mem GB">0.001</td>
+                <td data-label="60M T ms">9.90</td>
+                <td data-label="130M PPL">22.94</td>
+                <td data-label="130M Mem GB">0.002</td>
+                <td data-label="130M T ms">14.63</td>
+                <td data-label="350M PPL">17.85</td>
+                <td data-label="350M Mem GB">0.003</td>
+                <td data-label="350M T ms">29.70</td>
+                <td data-label="1B PPL">14.92</td>
+                <td data-label="1B Mem GB">0.004</td>
+                <td data-label="1B T ms">56.46</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Adam-mini</th>
+                <td data-label="Venue">ICLR&#x27;25</td>
+                <td data-label="60M PPL">30.50</td>
+                <td data-label="60M Mem GB">0.109</td>
+                <td data-label="60M T ms">5.68</td>
+                <td data-label="130M PPL">23.62</td>
+                <td data-label="130M Mem GB">0.251</td>
+                <td data-label="130M T ms">8.31</td>
+                <td data-label="350M PPL">18.12</td>
+                <td data-label="350M Mem GB">0.686</td>
+                <td data-label="350M T ms">16.68</td>
+                <td data-label="1B PPL">15.51</td>
+                <td data-label="1B Mem GB">2.495</td>
+                <td data-label="1B T ms">20.81</td>
+              </tr>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="14">Curvature-Aware &amp; Geometry-Regularized</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">AdamP</th>
+                <td data-label="Venue">ICLR&#x27;21</td>
+                <td data-label="60M PPL">30.21</td>
+                <td data-label="60M Mem GB">0.217</td>
+                <td data-label="60M T ms">12.82</td>
+                <td data-label="130M PPL">23.07</td>
+                <td data-label="130M Mem GB">0.500</td>
+                <td data-label="130M T ms">19.13</td>
+                <td data-label="350M PPL">17.39</td>
+                <td data-label="350M Mem GB">1.371</td>
+                <td data-label="350M T ms">39.98</td>
+                <td data-label="1B PPL">14.57</td>
+                <td data-label="1B Mem GB">4.989</td>
+                <td data-label="1B T ms">64.69</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">LAMB</th>
+                <td data-label="Venue">ICLR&#x27;20</td>
+                <td data-label="60M PPL">30.03</td>
+                <td data-label="60M Mem GB">0.217</td>
+                <td data-label="60M T ms">9.14</td>
+                <td data-label="130M PPL">23.40</td>
+                <td data-label="130M Mem GB">0.500</td>
+                <td data-label="130M T ms">13.17</td>
+                <td data-label="350M PPL">17.25</td>
+                <td data-label="350M Mem GB">1.371</td>
+                <td data-label="350M T ms">26.62</td>
+                <td data-label="1B PPL">16.09</td>
+                <td data-label="1B Mem GB">4.989</td>
+                <td data-label="1B T ms">44.18</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Sophia</th>
+                <td data-label="Venue">arXiv&#x27;23</td>
+                <td data-label="60M PPL">36.27</td>
+                <td data-label="60M Mem GB">0.217</td>
+                <td data-label="60M T ms">3.92</td>
+                <td data-label="130M PPL">25.76</td>
+                <td data-label="130M Mem GB">0.500</td>
+                <td data-label="130M T ms">5.66</td>
+                <td data-label="350M PPL">18.86</td>
+                <td data-label="350M Mem GB">1.371</td>
+                <td data-label="350M T ms">11.06</td>
+                <td data-label="1B PPL">16.45</td>
+                <td data-label="1B Mem GB">4.989</td>
+                <td data-label="1B T ms">20.05</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="table-note">Full Stage-1 C4 screening table: all optimizer families, four scales, and
+            PPL/memory/runtime values are retained.</p>
+        </div>
+        <div class="table-block">
+          <table class="data-table responsive-matrix dense-table" data-tex-label="tab:stage2_cross_arch">
+            <caption>Stage-2 cross-architecture generalization (FineWeb-Edu, 32k). WikiText test PPL at 340M and 1B
+              across four architectures. As absolute PPL is not comparable across architectures, the last columns give
+              each optimizer&#x27;s mean rank and range over the eight scenarios (lower is better). Per-scenario best in
+              green; gray = AdamW.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Optimizer</th>
+                <th scope="col">Transformer++ 340M</th>
+                <th scope="col">Transformer++ 1B</th>
+                <th scope="col">Gated DeltaNet 340M</th>
+                <th scope="col">Gated DeltaNet 1B</th>
+                <th scope="col">DeltaNet 340M</th>
+                <th scope="col">DeltaNet 1B</th>
+                <th scope="col">GLA 340M</th>
+                <th scope="col">GLA 1B</th>
+                <th scope="col">Mean rank</th>
+                <th scope="col">Rank range</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="11">T1: Element-wise Adaptive Moment</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">MARS-AdamW</th>
+                <td data-label="Transformer++ 340M">24.57</td>
+                <td data-label="Transformer++ 1B">18.94</td>
+                <td data-label="Gated DeltaNet 340M">24.17</td>
+                <td data-label="Gated DeltaNet 1B">20.04</td>
+                <td data-label="DeltaNet 340M">26.79</td>
+                <td data-label="DeltaNet 1B">20.67</td>
+                <td data-label="GLA 340M">28.28</td>
+                <td data-label="GLA 1B">21.89</td>
+                <td data-label="Mean rank">3.12</td>
+                <td data-label="Rank range">[2-5]</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">AdamW</th>
+                <td data-label="Transformer++ 340M">24.62</td>
+                <td data-label="Transformer++ 1B">18.90</td>
+                <td data-label="Gated DeltaNet 340M">24.47</td>
+                <td data-label="Gated DeltaNet 1B">20.33</td>
+                <td data-label="DeltaNet 340M">27.16</td>
+                <td data-label="DeltaNet 1B">20.66</td>
+                <td data-label="GLA 340M">28.67</td>
+                <td data-label="GLA 1B">22.06</td>
+                <td data-label="Mean rank">4.62</td>
+                <td data-label="Rank range">[2-6]</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Adan</th>
+                <td data-label="Transformer++ 340M">25.55</td>
+                <td data-label="Transformer++ 1B">19.41</td>
+                <td data-label="Gated DeltaNet 340M">24.78</td>
+                <td data-label="Gated DeltaNet 1B">20.55</td>
+                <td data-label="DeltaNet 340M">27.28</td>
+                <td data-label="DeltaNet 1B">20.88</td>
+                <td data-label="GLA 340M">29.00</td>
+                <td data-label="GLA 1B">22.51</td>
+                <td data-label="Mean rank">7.12</td>
+                <td data-label="Rank range">[5-9]</td>
+              </tr>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="11">T2: Matrix-Structured Methods</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">SOAP</th>
+                <td data-label="Transformer++ 340M">23.90</td>
+                <td data-label="Transformer++ 1B">18.72</td>
+                <td data-label="Gated DeltaNet 340M">23.85</td>
+                <td data-label="Gated DeltaNet 1B">19.86</td>
+                <td data-label="DeltaNet 340M">26.02</td>
+                <td data-label="DeltaNet 1B">20.38</td>
+                <td data-label="GLA 340M">27.04</td>
+                <td data-label="GLA 1B">20.62</td>
+                <td data-label="Mean rank">1.12</td>
+                <td data-label="Rank range">[1-2]</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">RMNP</th>
+                <td data-label="Transformer++ 340M">24.37</td>
+                <td data-label="Transformer++ 1B">19.40</td>
+                <td data-label="Gated DeltaNet 340M">23.65</td>
+                <td data-label="Gated DeltaNet 1B">20.26</td>
+                <td data-label="DeltaNet 340M">26.80</td>
+                <td data-label="DeltaNet 1B">21.06</td>
+                <td data-label="GLA 340M">28.60</td>
+                <td data-label="GLA 1B">22.23</td>
+                <td data-label="Mean rank">4.00</td>
+                <td data-label="Rank range">[1-7]</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Muon</th>
+                <td data-label="Transformer++ 340M">25.05</td>
+                <td data-label="Transformer++ 1B">19.86</td>
+                <td data-label="Gated DeltaNet 340M">24.34</td>
+                <td data-label="Gated DeltaNet 1B">20.32</td>
+                <td data-label="DeltaNet 340M">27.18</td>
+                <td data-label="DeltaNet 1B">21.18</td>
+                <td data-label="GLA 340M">27.47</td>
+                <td data-label="GLA 1B">21.54</td>
+                <td data-label="Mean rank">5.25</td>
+                <td data-label="Rank range">[2-8]</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">MARS-Shampoo</th>
+                <td data-label="Transformer++ 340M">26.43</td>
+                <td data-label="Transformer++ 1B">19.74</td>
+                <td data-label="Gated DeltaNet 340M">25.99</td>
+                <td data-label="Gated DeltaNet 1B">24.87</td>
+                <td data-label="DeltaNet 340M">28.26</td>
+                <td data-label="DeltaNet 1B">21.25</td>
+                <td data-label="GLA 340M">29.20</td>
+                <td data-label="GLA 1B">21.53</td>
+                <td data-label="Mean rank">8.25</td>
+                <td data-label="Rank range">[2-11]</td>
+              </tr>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="11">T3: Discretized Directions</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Lion</th>
+                <td data-label="Transformer++ 340M">26.02</td>
+                <td data-label="Transformer++ 1B">20.26</td>
+                <td data-label="Gated DeltaNet 340M">24.76</td>
+                <td data-label="Gated DeltaNet 1B">20.38</td>
+                <td data-label="DeltaNet 340M">28.20</td>
+                <td data-label="DeltaNet 1B">21.44</td>
+                <td data-label="GLA 340M">29.47</td>
+                <td data-label="GLA 1B">22.40</td>
+                <td data-label="Mean rank">8.25</td>
+                <td data-label="Rank range">[7-10]</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">MARS-Lion</th>
+                <td data-label="Transformer++ 340M">26.20</td>
+                <td data-label="Transformer++ 1B">21.17</td>
+                <td data-label="Gated DeltaNet 340M">25.24</td>
+                <td data-label="Gated DeltaNet 1B">22.20</td>
+                <td data-label="DeltaNet 340M">28.25</td>
+                <td data-label="DeltaNet 1B">22.72</td>
+                <td data-label="GLA 340M">29.67</td>
+                <td data-label="GLA 1B">23.79</td>
+                <td data-label="Mean rank">10.00</td>
+                <td data-label="Rank range">[9-11]</td>
+              </tr>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="11">T4: State-Compressed</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">Conda</th>
+                <td data-label="Transformer++ 340M">28.30</td>
+                <td data-label="Transformer++ 1B">19.86</td>
+                <td data-label="Gated DeltaNet 340M">26.11</td>
+                <td data-label="Gated DeltaNet 1B">21.07</td>
+                <td data-label="DeltaNet 340M">29.09</td>
+                <td data-label="DeltaNet 1B">21.75</td>
+                <td data-label="GLA 340M">37.38</td>
+                <td data-label="GLA 1B">22.89</td>
+                <td data-label="Mean rank">10.25</td>
+                <td data-label="Rank range">[9-11]</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">APOLLO</th>
+                <td data-label="Transformer++ 340M">34.08</td>
+                <td data-label="Transformer++ 1B">25.29</td>
+                <td data-label="Gated DeltaNet 340M">30.36</td>
+                <td data-label="Gated DeltaNet 1B">29.29</td>
+                <td data-label="DeltaNet 340M">34.73</td>
+                <td data-label="DeltaNet 1B">25.58</td>
+                <td data-label="GLA 340M">37.75</td>
+                <td data-label="GLA 1B">27.78</td>
+                <td data-label="Mean rank">12.00</td>
+                <td data-label="Rank range">[12-12]</td>
+              </tr>
+              <tr class="group-row">
+                <th scope="rowgroup" colspan="11">T5: Curvature-Aware</th>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Optimizer">AdamP</th>
+                <td data-label="Transformer++ 340M">24.68</td>
+                <td data-label="Transformer++ 1B">19.04</td>
+                <td data-label="Gated DeltaNet 340M">24.32</td>
+                <td data-label="Gated DeltaNet 1B">20.29</td>
+                <td data-label="DeltaNet 340M">26.77</td>
+                <td data-label="DeltaNet 1B">20.68</td>
+                <td data-label="GLA 340M">28.66</td>
+                <td data-label="GLA 1B">21.86</td>
+                <td data-label="Mean rank">4.00</td>
+                <td data-label="Rank range">[2-5]</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="table-note">Full Stage-2 long-context cross-architecture table with all eight scenario values and
+            rank summaries.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="citation" class="band" aria-labelledby="citation-title">
+      <div class="wrap citation-layout">
+        <div class="kicker">Citation</div>
+        <h2 id="citation-title">BibTeX</h2>
+        <div class="citation-code">
+          <button class="copy-citation" type="button" aria-label="Copy BibTeX"><i data-lucide="copy"
+              aria-hidden="true"></i></button>
+          <pre class="citation-box"><code id="citation-bibtex">@article{li2025scaling,
+  title = {{Scaling for Scaling: Taxonomy, Geometry, and Benchmarking of Modern Optimizers}},
+  author = {Siyuan Li and Jiabao Pan and Yumou Liu and Zhuoli Ouyang and Xin Jin and Xinglong Xu and Jingxuan Wei and Shengye Pang and Jintao Chen and Xuanhe Zhou and Conghui He and Cheng Tan},
+	  year = {2025}
+	}</code></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="partners" role="contentinfo">
+    <div class="wrap">
+      <div class="partner-logos">
+        <img src="images/tr_optimizer/logos/opendatalab-0930.png" alt="OpenDataLab logo" />
+        <img src="images/tr_optimizer/logos/shlab.png" alt="Shanghai AI Laboratory logo" />
+      </div>
+    </div>
+  </footer>
+  <dialog id="figure-modal" aria-label="Expanded figure">
+    <div class="modal-head"><strong id="modal-title">Figure preview</strong><button type="button" id="modal-close"
+        aria-label="Close figure preview"><i data-lucide="x" aria-hidden="true"></i></button></div><img id="modal-img"
+      alt="Expanded selected paper figure" />
+  </dialog>
+  <script>
+    if (window.lucide) { window.lucide.createIcons(); }
+    const modal = document.getElementById('figure-modal');
+    const modalImg = document.getElementById('modal-img');
+    const modalTitle = document.getElementById('modal-title');
+    document.querySelectorAll('.zoomable').forEach((img) => {
+      img.addEventListener('click', () => {
+        modalImg.src = img.currentSrc || img.src;
+        modalImg.alt = img.alt || 'Expanded paper figure';
+        const cap = img.closest('figure')?.querySelector('figcaption')?.textContent?.trim();
+        modalTitle.textContent = cap || 'Figure preview';
+        if (modal.showModal) modal.showModal();
+      });
+    });
+    document.getElementById('modal-close').addEventListener('click', () => modal.close());
+    modal.addEventListener('click', (event) => { if (event.target === modal) modal.close(); });
+    document.querySelector('.copy-citation')?.addEventListener('click', async () => {
+      const text = document.getElementById('citation-bibtex')?.textContent || '';
+      if (navigator.clipboard && text) await navigator.clipboard.writeText(text);
+    });
+  </script>
+</body>
+
+</html>

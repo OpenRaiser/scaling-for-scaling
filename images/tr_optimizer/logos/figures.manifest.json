@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "directory": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/logos",
+  "assets": [
+    {
+      "source": "/Volumes/T7/TR_Optimizer/assets/OpenDataLab_0930.png",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/logos/opendatalab-0930.png",
+      "kind": "raster",
+      "page": null,
+      "width": 516,
+      "height": 67,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/assets/OpenDataLab_blue_no_words.pdf",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/logos/opendatalab-blue-no-words.png",
+      "kind": "raster-from-pdf",
+      "page": null,
+      "width": 688,
+      "height": 130,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/assets/github_logo.pdf",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/logos/github-logo.png",
+      "kind": "raster-from-pdf",
+      "page": null,
+      "width": 245,
+      "height": 240,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/assets/huggingface_logo.png",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/logos/huggingface-logo.png",
+      "kind": "raster",
+      "page": null,
+      "width": 384,
+      "height": 384,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/assets/shlab.png",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/logos/shlab.png",
+      "kind": "raster",
+      "page": null,
+      "width": 2610,
+      "height": 306,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/assets/teaser.png",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/logos/teaser.png",
+      "kind": "raster",
+      "page": null,
+      "width": 1664,
+      "height": 806,
+      "alt": "",
+      "notes": []
+    },
+    {
+      "source": "/Volumes/T7/TR_Optimizer/assets/web_logo.pdf",
+      "output": "/Volumes/T7/TR_Optimizer/TR_Optimizer-webpage/images/tr_optimizer/logos/web-logo.png",
+      "kind": "raster-from-pdf",
+      "page": null,
+      "width": 640,
+      "height": 640,
+      "alt": "",
+      "notes": []
+    }
+  ]
+}
